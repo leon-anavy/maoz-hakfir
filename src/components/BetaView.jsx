@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
 const UNLOCK_HASHES = {
-  2: 'f57e5cb1f4532c008183057ecc94283801fcb5afe2d1c190e3dfd38c4da08042',
-  3: 'a21855da08cb102d1d217c53dc5824a3a795c1c1a44e971bf01ab9da3a2acbbf',
-  4: '6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443',
-  5: '2935af6b5f217a111ac12faa513c905a06d2cfe806340b89c8b14b19e3fbccfe',
+  2: '624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4',
+  3: 'b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569',
+  4: '670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf',
+  5: 'c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894',
 }
 
 function getUnlockCode(m) {
@@ -17,147 +17,131 @@ function BetaView() {
   const [codeInputs, setCodeInputs] = useState({ 2: '', 3: '', 4: '', 5: '' })
   const [codeFeedback, setCodeFeedback] = useState({ 2: null, 3: null, 4: null, 5: null })
 
-  // Module 1 state
-  const [index, setIndex] = useState('')
-  const [value, setValue] = useState('')
-  const [answer, setAnswer] = useState('')
-  const [feedback, setFeedback] = useState(null)
+  // Module 1 state — evenSum += value
+  const [m1Value, setM1Value] = useState('')
+  const [m1EvenSum, setM1EvenSum] = useState('')
+  const [m1NewEvenSum, setM1NewEvenSum] = useState('')
+  const [m1Feedback, setM1Feedback] = useState(null)
 
-  // Module 2 state
-  const [m2CurrVal, setM2CurrVal] = useState('')
-  const [m2NewVal, setM2NewVal] = useState('')
-  const [m2Pointer, setM2Pointer] = useState(null)
+  // Module 2 state — vowelCount++
+  const [m2VowelCount, setM2VowelCount] = useState('')
+  const [m2NewVowelCount, setM2NewVowelCount] = useState('')
   const [m2Feedback, setM2Feedback] = useState(null)
 
-  // Module 3 state
-  const [m3Value, setM3Value] = useState('')
-  const [m3NewValue, setM3NewValue] = useState('')
-  const [m3Direction, setM3Direction] = useState(null)
+  // Module 3 state — longCount++
+  const [m3LongCount, setM3LongCount] = useState('')
+  const [m3NewLongCount, setM3NewLongCount] = useState('')
   const [m3Feedback, setM3Feedback] = useState(null)
 
-  // Module 4 state
-  const [m4R1, setM4R1] = useState('')
-  const [m4ProcessVal, setM4ProcessVal] = useState('')
-  const [m4NewR1, setM4NewR1] = useState('')
-  const [m4QueueAction, setM4QueueAction] = useState(null)
+  // Module 4 state — secondMax = max; max = value
+  const [m4Value, setM4Value] = useState('')
+  const [m4Max, setM4Max] = useState('')
+  const [m4NewMax, setM4NewMax] = useState('')
+  const [m4NewSecondMax, setM4NewSecondMax] = useState('')
   const [m4Feedback, setM4Feedback] = useState(null)
 
-  // Module 5 state
-  const [m5CurrentID, setM5CurrentID] = useState('')
-  const [m5PrevID, setM5PrevID] = useState('')
-  const [m5KeyAnswer, setM5KeyAnswer] = useState('')
+  // Module 5 state — score += len + 2
+  const [m5Score, setM5Score] = useState('')
+  const [m5Len, setM5Len] = useState('')
+  const [m5NewScore, setM5NewScore] = useState('')
   const [m5Feedback, setM5Feedback] = useState(null)
 
-  function verify() {
-    const i = parseInt(index, 10)
-    const v = parseInt(value, 10)
-    const studentAnswer = parseInt(answer, 10)
-    if (isNaN(i) || isNaN(v) || isNaN(studentAnswer)) return
-
-    const realAnswer = i + (v % 3) + 1
-
-    if (studentAnswer === realAnswer) {
-      setFeedback({ success: true, nextIndex: realAnswer })
+  // Module 1 verify
+  function verifyM1() {
+    const v = parseInt(m1Value, 10)
+    const es = parseInt(m1EvenSum, 10)
+    const nes = parseInt(m1NewEvenSum, 10)
+    if (isNaN(v) || isNaN(es) || isNaN(nes)) return
+    if (nes === es + v) {
+      setM1Feedback({ success: true, result: nes })
     } else {
-      setFeedback({ success: false })
+      setM1Feedback({ success: false })
     }
   }
 
-  function reset() {
-    setIndex('')
-    setValue('')
-    setAnswer('')
-    setFeedback(null)
+  function resetM1() {
+    setM1Value('')
+    setM1EvenSum('')
+    setM1NewEvenSum('')
+    setM1Feedback(null)
   }
 
+  // Module 2 verify
   function verifyM2() {
-    const curr = parseInt(m2CurrVal, 10)
-    const newV = parseInt(m2NewVal, 10)
-    if (isNaN(curr) || isNaN(newV) || !m2Pointer) return
-
-    const valCorrect = newV === curr * 3 - 2
-    const pointerCorrect = m2Pointer === 'advances'
-
-    if (valCorrect && pointerCorrect) {
-      setM2Feedback({ success: true })
+    const vc = parseInt(m2VowelCount, 10)
+    const nvc = parseInt(m2NewVowelCount, 10)
+    if (isNaN(vc) || isNaN(nvc)) return
+    if (nvc === vc + 1) {
+      setM2Feedback({ success: true, result: nvc })
     } else {
       setM2Feedback({ success: false })
     }
   }
 
   function resetM2() {
-    setM2CurrVal('')
-    setM2NewVal('')
-    setM2Pointer(null)
+    setM2VowelCount('')
+    setM2NewVowelCount('')
     setM2Feedback(null)
   }
 
+  // Module 3 verify
   function verifyM3() {
-    const v = parseInt(m3Value, 10)
-    const newV = parseInt(m3NewValue, 10)
-    if (isNaN(v) || isNaN(newV) || !m3Direction) return
-
-    const correctNewVal = (v * 2) % 10
-    const valCorrect = newV === correctNewVal
-    const correctDir = correctNewVal > 5 ? 'down' : 'right'
-    const dirCorrect = m3Direction === correctDir
-
-    if (valCorrect && dirCorrect) {
-      setM3Feedback({ success: true })
+    const lc = parseInt(m3LongCount, 10)
+    const nlc = parseInt(m3NewLongCount, 10)
+    if (isNaN(lc) || isNaN(nlc)) return
+    if (nlc === lc + 1) {
+      setM3Feedback({ success: true, result: nlc })
     } else {
       setM3Feedback({ success: false })
     }
   }
 
   function resetM3() {
-    setM3Value('')
-    setM3NewValue('')
-    setM3Direction(null)
+    setM3LongCount('')
+    setM3NewLongCount('')
     setM3Feedback(null)
   }
 
+  // Module 4 verify
   function verifyM4() {
-    const r1 = parseInt(m4R1, 10)
-    const p = parseInt(m4ProcessVal, 10)
-    const newR1 = parseInt(m4NewR1, 10)
-    if (isNaN(r1) || isNaN(p) || isNaN(newR1) || !m4QueueAction) return
-
-    const correctNewR1 = r1 + p
-    const newProcessVal = p - 4
-    const correctAction = newProcessVal > 0 ? 'enqueue' : 'terminate'
-
-    if (newR1 === correctNewR1 && m4QueueAction === correctAction) {
-      setM4Feedback({ success: true })
+    const v = parseInt(m4Value, 10)
+    const mx = parseInt(m4Max, 10)
+    const nmx = parseInt(m4NewMax, 10)
+    const nsmx = parseInt(m4NewSecondMax, 10)
+    if (isNaN(v) || isNaN(mx) || isNaN(nmx) || isNaN(nsmx)) return
+    // secondMax = old max; max = value
+    if (nmx === v && nsmx === mx) {
+      setM4Feedback({ success: true, newMax: v, newSecondMax: mx })
     } else {
       setM4Feedback({ success: false })
     }
   }
 
   function resetM4() {
-    setM4R1('')
-    setM4ProcessVal('')
-    setM4NewR1('')
-    setM4QueueAction(null)
+    setM4Value('')
+    setM4Max('')
+    setM4NewMax('')
+    setM4NewSecondMax('')
     setM4Feedback(null)
   }
 
+  // Module 5 verify
   function verifyM5() {
-    const curr = parseInt(m5CurrentID, 10)
-    const prev = parseInt(m5PrevID, 10)
-    const studentKey = parseInt(m5KeyAnswer, 10)
-    if (isNaN(curr) || isNaN(prev) || isNaN(studentKey)) return
-    const correctKey = (curr * 2) + prev
-    if (studentKey === correctKey) {
-      setM5Feedback({ success: true, key: correctKey })
+    const sc = parseInt(m5Score, 10)
+    const len = parseInt(m5Len, 10)
+    const nsc = parseInt(m5NewScore, 10)
+    if (isNaN(sc) || isNaN(len) || isNaN(nsc)) return
+    if (nsc === sc + len + 2) {
+      setM5Feedback({ success: true, result: nsc })
     } else {
       setM5Feedback({ success: false })
     }
   }
 
   function resetM5() {
-    setM5CurrentID('')
-    setM5PrevID('')
-    setM5KeyAnswer('')
+    setM5Score('')
+    setM5Len('')
+    setM5NewScore('')
     setM5Feedback(null)
   }
 
@@ -217,17 +201,17 @@ function BetaView() {
           סוכן מחשבים 1
         </h2>
         <p className="text-cyan-500/50 text-xs text-center mb-4">
-          COMPUTE_AGENT_1 :: DIVISIBLE_PATH
+          COMPUTE_AGENT_1 :: BETA_PATH
         </p>
 
         {/* Module Tabs */}
         <div className="flex gap-2 mb-5">
           {[
-            { m: 1, label: 'מודול 1: מערכים', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
-            { m: 2, label: 'מודול 2: רשימה מקושרת', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
-            { m: 3, label: 'מודול 3: מטריצה', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
-            { m: 4, label: 'מודול 4: מתזמן CPU', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
-            { m: 5, label: 'מודול 5: המבוך', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
+            { m: 1, label: 'מודול 1: לולאות', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
+            { m: 2, label: 'מודול 2: תווים ומחרוזות', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
+            { m: 3, label: 'מודול 3: מתודות ואורך', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
+            { m: 4, label: 'מודול 4: מערכים — מקסימום', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
+            { m: 5, label: 'מודול 5: מחרוזות ותווים', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
           ].map(({ m, label, active }) => (
             <button
               key={m}
@@ -245,67 +229,68 @@ function BetaView() {
           ))}
         </div>
 
-        {/* ==================== MODULE 1: Arrays ==================== */}
+        {/* ==================== MODULE 1: evenSum += value ==================== */}
         {activeModule === 1 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3 text-center space-y-1">
               <div className="text-cyan-500/40 text-xs">הנוסחה שלך</div>
               <div className="text-cyan-400 text-lg font-bold" dir="ltr">
-                nextIndex = i + (value % 3) + 1
+                evenSum += value
               </div>
+              <div className="text-cyan-400/60 text-xs" dir="rtl">מגיעים אליך רק ערכים זוגיים!</div>
             </div>
 
-            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3 text-cyan-400/70 text-xs leading-relaxed text-center">
-              חשב את האינדקס הבא לפי הנוסחה. הזן את התוצאה לאימות.
+            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3 text-cyan-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל ערך זוגי מהמנתב. הוסף אותו ל-evenSum הנוכחי ודווח את הסכום החדש.
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">אינדקס נוכחי (i)</label>
+                <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">ערך שהתקבל (value)</label>
                 <input
                   type="number"
-                  value={index}
-                  onChange={(e) => { setIndex(e.target.value); setFeedback(null) }}
+                  value={m1Value}
+                  onChange={(e) => { setM1Value(e.target.value); setM1Feedback(null) }}
                   className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
                              text-cyan-400 font-mono text-lg text-center
                              focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
                              transition-all placeholder:text-cyan-500/20"
-                  placeholder="i"
+                  placeholder="value"
                 />
               </div>
               <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">ערך נוכחי (value)</label>
+                <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">evenSum נוכחי</label>
                 <input
                   type="number"
-                  value={value}
-                  onChange={(e) => { setValue(e.target.value); setFeedback(null) }}
+                  value={m1EvenSum}
+                  onChange={(e) => { setM1EvenSum(e.target.value); setM1Feedback(null) }}
                   className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
                              text-cyan-400 font-mono text-lg text-center
                              focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
                              transition-all placeholder:text-cyan-500/20"
-                  placeholder="val"
+                  placeholder="evenSum"
                 />
               </div>
             </div>
 
             <div className="border-t border-cyan-500/10 pt-4">
               <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
-              <label className="block text-cyan-500/60 text-xs mb-1">האינדקס הבא (nextIndex)</label>
+              <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">evenSum חדש = ?</label>
               <input
                 type="number"
-                value={answer}
-                onChange={(e) => { setAnswer(e.target.value); setFeedback(null) }}
+                value={m1NewEvenSum}
+                onChange={(e) => { setM1NewEvenSum(e.target.value); setM1Feedback(null) }}
                 className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="?"
+                placeholder="evenSum + value = ?"
               />
             </div>
 
             <div className="flex gap-2">
               <button
-                onClick={verify}
+                onClick={verifyM1}
                 className="flex-1 py-2.5 bg-cyan-500/10 border border-cyan-500/40 rounded
                            text-cyan-400 font-mono font-bold
                            hover:bg-cyan-500/20 hover:border-cyan-400
@@ -314,9 +299,9 @@ function BetaView() {
               >
                 אמת פקודה
               </button>
-              {feedback && (
+              {m1Feedback && (
                 <button
-                  onClick={reset}
+                  onClick={resetM1}
                   className="px-4 py-2.5 border border-cyan-500/20 rounded
                              text-cyan-500/50 hover:text-cyan-400 hover:border-cyan-500/40
                              transition-all cursor-pointer"
@@ -326,15 +311,15 @@ function BetaView() {
               )}
             </div>
 
-            {feedback && (
+            {m1Feedback && (
               <div className="mt-1">
-                {feedback.success ? (
+                {m1Feedback.success ? (
                   <div className="rounded p-4 text-center border
                                   bg-green-500/10 border-green-400/40 shadow-[0_0_20px_rgba(74,222,128,0.2)]
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: האינדקס הבא הוא {feedback.nextIndex}
+                      דווח לסוכן השטח: evenSum = {m1Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -352,79 +337,48 @@ function BetaView() {
           </div>
         )}
 
-        {/* ==================== MODULE 2: Linked Lists ==================== */}
+        {/* ==================== MODULE 2: vowelCount++ ==================== */}
         {activeModule === 2 && (unlockedModules.has(2) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-violet-500/40 text-xs">הכלל שלך (מתחלק ב-4)</div>
-              <div className="text-violet-400 text-sm font-bold" dir="ltr">
-                curr.setValue(curr.getValue() * 3 - 2);
+              <div className="text-violet-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-violet-400 text-lg font-bold" dir="ltr">
+                vowelCount++
               </div>
-              <div className="text-violet-400 text-sm font-bold" dir="ltr">
-                curr = curr.getNext();
-              </div>
+              <div className="text-violet-400/60 text-xs" dir="rtl">מגיעים אליך רק תנועות!</div>
             </div>
 
-            <div className="bg-violet-500/5 border border-violet-500/20 rounded p-3 text-violet-400/70 text-xs leading-relaxed text-center">
-              חשב את הערך החדש של החוליה הנוכחית. מה קורה למצביע?
+            <div className="bg-violet-500/5 border border-violet-500/20 rounded p-3 text-violet-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל תנועה מהמנתב. הגדל את vowelCount ב-1 ודווח את הערך החדש.
             </div>
 
             <div>
-              <label className="block text-violet-500/60 text-xs mb-1">מה הערך הנוכחי לפני השינוי?</label>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">vowelCount נוכחי</label>
               <input
                 type="number"
-                value={m2CurrVal}
-                onChange={(e) => { setM2CurrVal(e.target.value); setM2Feedback(null) }}
+                value={m2VowelCount}
+                onChange={(e) => { setM2VowelCount(e.target.value); setM2Feedback(null) }}
                 className="w-full bg-gray-950 border border-violet-500/30 rounded px-3 py-2
                            text-violet-400 font-mono text-lg text-center
                            focus:outline-none focus:border-violet-400 focus:shadow-[0_0_10px_rgba(139,92,246,0.2)]
                            transition-all placeholder:text-violet-500/20"
-                placeholder="curr.getValue()"
+                placeholder="vowelCount"
               />
             </div>
 
             <div className="border-t border-violet-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאת החישוב שלך</div>
-
-              <div>
-                <label className="block text-violet-500/60 text-xs mb-1">מה יהיה הערך החדש של החוליה?</label>
-                <input
-                  type="number"
-                  value={m2NewVal}
-                  onChange={(e) => { setM2NewVal(e.target.value); setM2Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="value * 3 - 2 = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-violet-500/60 text-xs mb-2">מה קורה למצביע (curr)?</label>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => { setM2Pointer('advances'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Pointer === 'advances'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    המצביע (curr) מתקדם לחוליה הבאה
-                  </button>
-                  <button
-                    onClick={() => { setM2Pointer('stays'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Pointer === 'stays'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    המצביע (curr) נשאר באותה חוליה
-                  </button>
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">vowelCount חדש = ?</label>
+              <input
+                type="number"
+                value={m2NewVowelCount}
+                onChange={(e) => { setM2NewVowelCount(e.target.value); setM2Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="vowelCount + 1 = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -458,7 +412,7 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: עדכן ערך והתקדם לחוליה הבאה
+                      דווח לסוכן השטח: vowelCount = {m2Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -473,80 +427,51 @@ function BetaView() {
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(2)
-        )}
-        {/* ==================== MODULE 3: Matrix (Integer Division) ==================== */}
+          </div>
+        ) : renderLockScreen(2))}
+
+        {/* ==================== MODULE 3: longCount++ ==================== */}
         {activeModule === 3 && (unlockedModules.has(3) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-amber-500/40 text-xs">Your Rule (Condition TRUE)</div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                newValue = (value * 2) % 10
+              <div className="text-amber-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-amber-400 text-lg font-bold" dir="ltr">
+                longCount++
               </div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                if (newValue &gt; 5) → r++ (down)
-              </div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                else → c++ (right)
-              </div>
+              <div className="text-amber-400/60 text-xs" dir="rtl">מגיעות אליך רק מילים ארוכות (len &gt; 3)!</div>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded p-3 text-amber-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל מילה ארוכה מהמנתב. הגדל את longCount ב-1 ודווח את הערך החדש.
             </div>
 
             <div>
-              <label className="block text-amber-500/60 text-xs mb-1">Current cell value</label>
+              <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">longCount נוכחי</label>
               <input
                 type="number"
-                value={m3Value}
-                onChange={(e) => { setM3Value(e.target.value); setM3Feedback(null) }}
+                value={m3LongCount}
+                onChange={(e) => { setM3LongCount(e.target.value); setM3Feedback(null) }}
                 className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="value"
+                placeholder="longCount"
               />
             </div>
 
             <div className="border-t border-amber-500/10 pt-4">
-              <div className="text-orange-400/70 text-xs text-center mb-3">Enter your result:</div>
-
-              <div>
-                <label className="block text-amber-500/60 text-xs mb-1">(value * 2) % 10 = ?</label>
-                <input
-                  type="number"
-                  value={m3NewValue}
-                  onChange={(e) => { setM3NewValue(e.target.value); setM3Feedback(null) }}
-                  className="w-full bg-gray-950 border border-orange-500/30 rounded px-3 py-2
-                             text-orange-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-orange-400 focus:shadow-[0_0_10px_rgba(249,115,22,0.2)]
-                             transition-all placeholder:text-orange-500/20"
-                  placeholder="(value * 2) % 10 = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-amber-500/60 text-xs mb-2">Direction (based on newValue):</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setM3Direction('down'); setM3Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m3Direction === 'down'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
-                      }`}
-                  >
-                    newValue &gt; 5 → r++ (down)
-                  </button>
-                  <button
-                    onClick={() => { setM3Direction('right'); setM3Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m3Direction === 'right'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
-                      }`}
-                  >
-                    newValue &le; 5 → c++ (right)
-                  </button>
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">longCount חדש = ?</label>
+              <input
+                type="number"
+                value={m3NewLongCount}
+                onChange={(e) => { setM3NewLongCount(e.target.value); setM3Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="longCount + 1 = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -580,7 +505,7 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: הערך החדש הוא התוצאה, זוז למטה. אם יוצאים מגבול — חזור לשורה 0!
+                      דווח לסוכן השטח: longCount = {m3Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -595,95 +520,84 @@ function BetaView() {
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(3)
-        )}
+          </div>
+        ) : renderLockScreen(3))}
 
-        {/* ==================== MODULE 4: CPU Scheduler (R1 Logic) ==================== */}
+        {/* ==================== MODULE 4: secondMax = max; max = value ==================== */}
         {activeModule === 4 && (unlockedModules.has(4) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-red-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-red-500/40 text-xs">הכלל שלך (תהליכים זוגיים)</div>
+              <div className="text-red-500/40 text-xs">הנוסחה שלך</div>
               <div className="text-red-400 text-sm font-bold" dir="ltr">
-                R1 += processValue
+                secondMax = max;
               </div>
               <div className="text-red-400 text-sm font-bold" dir="ltr">
-                processValue -= 4
+                max = value;
               </div>
+              <div className="text-red-400/60 text-xs" dir="rtl">מגיעים אליך רק ערכים הגדולים ממקסימום נוכחי!</div>
             </div>
 
-            <div className="bg-red-500/5 border border-red-500/20 rounded p-3 text-red-400/70 text-xs leading-relaxed text-center">
-              חשב את הערך החדש של R1 לאחר הוספת ערך התהליך. האם התהליך שורד לאחר הפחתת 4?
+            <div className="bg-red-500/5 border border-red-500/20 rounded p-3 text-red-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל ערך חדש (גדול מ-max). שמור את max הישן כ-secondMax החדש, ועדכן max לערך החדש.
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">הערך הנוכחי של R1</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">ערך חדש שהתקבל</label>
                 <input
                   type="number"
-                  value={m4R1}
-                  onChange={(e) => { setM4R1(e.target.value); setM4Feedback(null) }}
+                  value={m4Value}
+                  onChange={(e) => { setM4Value(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="R1"
+                  placeholder="value"
                 />
               </div>
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">ערך התהליך</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">max נוכחי</label>
                 <input
                   type="number"
-                  value={m4ProcessVal}
-                  onChange={(e) => { setM4ProcessVal(e.target.value); setM4Feedback(null) }}
+                  value={m4Max}
+                  onChange={(e) => { setM4Max(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="process"
+                  placeholder="max"
                 />
               </div>
             </div>
 
             <div className="border-t border-red-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאת החישוב שלך</div>
-
-              <div>
-                <label className="block text-red-500/60 text-xs mb-1">מהו הערך החדש של R1?</label>
-                <input
-                  type="number"
-                  value={m4NewR1}
-                  onChange={(e) => { setM4NewR1(e.target.value); setM4Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="R1 + process = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-red-500/60 text-xs mb-2">מה קורה לתהליך לאחר הפחתת 4?</label>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => { setM4QueueAction('enqueue'); setM4Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m4QueueAction === 'enqueue'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
-                      }`}
-                  >
-                    הכנס חזרה לתור (Enqueue)
-                  </button>
-                  <button
-                    onClick={() => { setM4QueueAction('terminate'); setM4Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m4QueueAction === 'terminate'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
-                      }`}
-                  >
-                    סיים תהליך (Terminate / Do not enqueue)
-                  </button>
+              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאות החישוב שלך</div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-red-500/60 text-xs mb-1" dir="rtl">max חדש = ?</label>
+                  <input
+                    type="number"
+                    value={m4NewMax}
+                    onChange={(e) => { setM4NewMax(e.target.value); setM4Feedback(null) }}
+                    className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                               text-amber-400 font-mono text-lg text-center
+                               focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                               transition-all placeholder:text-amber-500/20"
+                    placeholder="newMax"
+                  />
+                </div>
+                <div>
+                  <label className="block text-red-500/60 text-xs mb-1" dir="rtl">secondMax חדש = ?</label>
+                  <input
+                    type="number"
+                    value={m4NewSecondMax}
+                    onChange={(e) => { setM4NewSecondMax(e.target.value); setM4Feedback(null) }}
+                    className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                               text-amber-400 font-mono text-lg text-center
+                               focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                               transition-all placeholder:text-amber-500/20"
+                    placeholder="newSecondMax"
+                  />
                 </div>
               </div>
             </div>
@@ -719,7 +633,7 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      VERIFIED: אמור לסוכן השטח את ה-R1 החדש ואת פעולת התור
+                      דווח: max={m4Feedback.newMax}, secondMax={m4Feedback.newSecondMax}
                     </div>
                   </div>
                 ) : (
@@ -728,71 +642,71 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת חישוב — נסה שוב
+                      שגיאת חישוב — זכור: secondMax מקבל את max הישן
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(4)
-        )}
+          </div>
+        ) : renderLockScreen(4))}
 
-        {/* ==================== MODULE 5: Maze (Key Maker) ==================== */}
+        {/* ==================== MODULE 5: score += len + 2 ==================== */}
         {activeModule === 5 && (unlockedModules.has(5) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-yellow-500/40 text-xs">הנוסחה שלך (יוצר המפתחות)</div>
+              <div className="text-yellow-500/40 text-xs">הנוסחה שלך</div>
               <div className="text-yellow-400 text-lg font-bold" dir="ltr">
-                Key = (Current_ID &times; 2) + Previous_ID
+                score += len + 2
               </div>
-              <div className="text-yellow-400/60 text-xs">(בצעד הראשון, Previous_ID = 0)</div>
+              <div className="text-yellow-400/60 text-xs" dir="rtl">מגיעים אליך רק שמות שתו ראשון ≤ M!</div>
             </div>
 
-            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded p-3 text-yellow-400/70 text-xs leading-relaxed text-center">
-              כשסוכן המנתב מבקש ממך מפתח, שאל את סוכן השטח: מה ה-ID המעודכן של החדר הנוכחי? ומה ה-ID של החדר הקודם? חשב את המפתח ומסור אותו לסוכן המנתב.
+            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded p-3 text-yellow-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל אורך שם מהמנתב. הוסף len+2 לניקוד ודווח את הניקוד החדש.
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-yellow-500/60 text-xs mb-1">ID החדר הנוכחי</label>
+                <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">ניקוד נוכחי (score)</label>
                 <input
                   type="number"
-                  value={m5CurrentID}
-                  onChange={(e) => { setM5CurrentID(e.target.value); setM5Feedback(null) }}
+                  value={m5Score}
+                  onChange={(e) => { setM5Score(e.target.value); setM5Feedback(null) }}
                   className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
                              text-yellow-400 font-mono text-lg text-center
                              focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
                              transition-all placeholder:text-yellow-500/20"
-                  placeholder="Current ID"
+                  placeholder="score"
                 />
               </div>
               <div>
-                <label className="block text-yellow-500/60 text-xs mb-1">ID החדר הקודם</label>
+                <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">אורך השם (len)</label>
                 <input
                   type="number"
-                  value={m5PrevID}
-                  onChange={(e) => { setM5PrevID(e.target.value); setM5Feedback(null) }}
+                  value={m5Len}
+                  onChange={(e) => { setM5Len(e.target.value); setM5Feedback(null) }}
                   className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
                              text-yellow-400 font-mono text-lg text-center
                              focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
                              transition-all placeholder:text-yellow-500/20"
-                  placeholder="Previous ID"
+                  placeholder="len"
                 />
               </div>
             </div>
 
             <div className="border-t border-yellow-500/10 pt-4">
-              <div className="text-yellow-300/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
-              <label className="block text-yellow-500/60 text-xs mb-1">מהו המפתח (Key)?</label>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">ניקוד חדש = ?</label>
               <input
                 type="number"
-                value={m5KeyAnswer}
-                onChange={(e) => { setM5KeyAnswer(e.target.value); setM5Feedback(null) }}
-                className="w-full bg-gray-950 border border-amber-300/30 rounded px-3 py-2
-                           text-amber-300 font-mono text-lg text-center
-                           focus:outline-none focus:border-amber-300 focus:shadow-[0_0_10px_rgba(252,211,77,0.2)]
-                           transition-all placeholder:text-amber-300/20"
-                placeholder="(Current_ID × 2) + Previous_ID = ?"
+                value={m5NewScore}
+                onChange={(e) => { setM5NewScore(e.target.value); setM5Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="score + len + 2 = ?"
               />
             </div>
 
@@ -827,7 +741,7 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      VERIFIED: מסור לסוכן המנתב — המפתח הוא {m5Feedback.key}
+                      דווח לסוכן השטח: score = {m5Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -836,14 +750,14 @@ function BetaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת חישוב — נסה שוב
+                      שגיאת חישוב — זכור: score += len + 2
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(5)
-        )}
+          </div>
+        ) : renderLockScreen(5))}
       </div>
     </div>
   )

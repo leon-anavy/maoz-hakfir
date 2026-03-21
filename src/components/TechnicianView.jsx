@@ -1,42 +1,24 @@
 import { useState, useEffect, useCallback } from 'react'
 import confetti from 'canvas-confetti'
 
-const M1_HASH = 'f57e5cb1f4532c008183057ecc94283801fcb5afe2d1c190e3dfd38c4da08042'
-const M2_HASH = 'a21855da08cb102d1d217c53dc5824a3a795c1c1a44e971bf01ab9da3a2acbbf'
-const M3_HASH = '6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443'
-const M4_HASH = '2935af6b5f217a111ac12faa513c905a06d2cfe806340b89c8b14b19e3fbccfe'
-const M5_HASH = 'f09d8479566a0c7cdb156fa8635e44990b471b4a641167201c79fed549ecd5f0'
+const M1_HASH = '624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4'
+const M2_HASH = 'b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569'
+const M3_HASH = '670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf'
+const M4_HASH = 'c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894'
+const M5_HASH = '9f14025af0065b30e47e23ebb3b491d39ae8ed17d33739e5ff3827ffb3634953'
 
-const ROOMS_DATA = [
-  { name: 'A', id: 10, door1: 'B', door2: 'C' },
-  { name: 'B', id: 5, door1: 'D', door2: 'A' },
-  { name: 'C', id: 8, door1: 'A', door2: 'D' },
-  { name: 'D', id: 3, door1: 'C', door2: 'B' },
-]
-
-const QUEUE_DATA = [12, 7]
-
-const ARRAY_DATA = [15, 42, 8, 23, 91, 4, 17, 33, 50, 12]
-
-const MATRIX_DATA = [
-  [5, 2, 9, 4],
-  [12, 7, 1, 8],
-  [3, 10, 6, 11],
-  [15, 0, 14, 13],
-]
-
-const LINKED_LIST = [
-  { name: 'A', val: 5, next: 'B' },
-  { name: 'B', val: 9, next: 'C' },
-  { name: 'C', val: 16, next: null },
-]
+const ARRAY_DATA = [3, 8, 5, 12, 7, 4, 9, 2]
+const STRING_DATA = 'PROGRAM'
+const WORDS_DATA = ['cat', 'hello', 'go', 'java', 'hi']
+const MAX_DATA = [5, 12, 3, 18, 7, 15, 2, 9]
+const NAMES_DATA = ['Noa', 'Amit', 'Tamar', 'Ben', 'Yael']
 
 const HINTS = {
-  1: 'באיטרציה הראשונה: i=0, value=15. סוכן המנתב אומר sum = 0+15 = 15 (אי-זוגי) → סוכן 2. סוכן 2 אומר האינדקס הבא = 0+1 = 1',
-  2: 'צעד 1: A(5). 5%4≠0 → סוכן 2. ערך חדש=5+3=8, מדלג על B, curr נשאר על A. עכשיו: A(8)→C(16). צעד 2: A(8). 8%4=0 → סוכן 1.',
-  3: 'צעד 1: (0,0) val=5. (0+0)%3=0 → סוכן 1. newValue=(5*2)%10=0. 0≤5 → c++ (ימינה) → (0,1). צעד 2: (0,1) val=2. (0+1)%3≠0 → סוכן 2.',
-  4: 'תהליך ראשון: 12 יוצא מהתור. R1=0, R2=0. סוכן המנתב: R1 לא גדול מ-R2, אז adjusted=12. 12 זוגי → סוכן 1.',
-  5: 'צעד 1: מפתח = (10×2)+0 = 20. 20 זוגי → השתמש בדלת 1. דלת 1 של A מובילה ל-B.',
+  1: 'צעד ראשון: data[0]=3. 3 אי-זוגי → סוכן 2. oddCount=1. לא מוסיפים לסכום הזוגי.',
+  2: 'תו ראשון: P. P אינו תנועה → סוכן 2. consonantCount=1.',
+  3: 'מילה ראשונה: "cat", אורך=3. 3>3? לא → סוכן 2. shortTotal=3.',
+  4: 'i=1: data[1]=12. 12>5 (max הנוכחי)? כן → סוכן 1. max=12, secondMax=5.',
+  5: 'שם ראשון: "Noa". תו ראשון: N. N>"M"? כן → סוכן 2. score += 3*2 = 6.',
 }
 
 const HASHES = { 1: M1_HASH, 2: M2_HASH, 3: M3_HASH, 4: M4_HASH, 5: M5_HASH }
@@ -53,7 +35,7 @@ function getUnlockCode(moduleToUnlock) {
 }
 
 const FAILS_FOR_HINT = 3
-const COOLDOWNS = [0, 0, 0, 15, 30, 60, 120] // indexed by fail count, 120 for 6+
+const COOLDOWNS = [0, 0, 0, 15, 30, 60, 120]
 
 function getCooldownSeconds(failCount) {
   if (failCount < FAILS_FOR_HINT) return 0
@@ -78,11 +60,11 @@ const MODULE_COLORS = {
 }
 
 const MODULE_NAMES = {
-  1: 'מודול 1: מערכים',
-  2: 'מודול 2: רשימה מקושרת',
-  3: 'מודול 3: מטריצה',
-  4: 'מודול 4: מתזמן CPU',
-  5: 'מודול 5: המבוך',
+  1: 'מודול 1: לולאות',
+  2: 'מודול 2: תווים ומחרוזות',
+  3: 'מודול 3: מתודות ואורך',
+  4: 'מודול 4: מערכים — מקסימום',
+  5: 'מודול 5: מחרוזות ותווים',
 }
 
 function TechnicianView({ startTime }) {
@@ -129,7 +111,6 @@ function TechnicianView({ startTime }) {
   const verify = useCallback(async (m) => {
     let input = answers[m].trim()
     if (!input) return
-    if (m === 5) input = input.toUpperCase()
     const hex = await hashValue(input)
     const success = hex === HASHES[m]
 
@@ -239,18 +220,16 @@ function TechnicianView({ startTime }) {
                           animate-pulse">
             <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
             <div className="text-green-400 font-bold text-lg">
-              {m === 5 ? 'קואורדינטות נכונות! עוקף מערכת...' : `מודול ${m} הושלם בהצלחה`}
+              {`מודול ${m} הושלם בהצלחה`}
             </div>
           </div>
         ) : (
           <div className="rounded p-4 text-center border
                           bg-red-500/10 border-red-400/40 shadow-[0_0_20px_rgba(239,68,68,0.2)]
                           animate-pulse">
-            <div className="text-red-500/70 text-xs mb-1 tracking-widest">
-              {m === 5 ? 'OVERRIDE FAILED' : 'ACCESS DENIED'}
-            </div>
+            <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
             <div className="text-red-400 font-bold text-lg">
-              {m === 5 ? 'קואורדינטות שגויות — עקבו אחר המבוך שוב' : 'ערך שגוי — בדוק את המעקב שלך ונסה שוב'}
+              ערך שגוי — בדק את המעקב שלך ונסה שוב
             </div>
           </div>
         )}
@@ -322,7 +301,7 @@ function TechnicianView({ startTime }) {
           })}
         </div>
 
-        {/* ==================== MODULE 1: Arrays ==================== */}
+        {/* ==================== MODULE 1: Loops ==================== */}
         {activeModule === 1 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3">
@@ -344,19 +323,32 @@ function TechnicianView({ startTime }) {
             <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3">
               <div className="text-cyan-500/40 text-xs text-center mb-2">קוד התוכנית</div>
               <pre className="text-cyan-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`int[] data = {15, 42, 8, 23, 91, 4, 17, 33, 50, 12};
-int sum = 0;
-int i = 0;
-while (i >= 0 && i < data.length) {
-    sum += data[i];
-    i = Expert.jump(data[i], i);
-}`}
+{`int[] data = {3, 8, 5, 12, 7, 4, 9, 2};
+int evenSum = 0, oddCount = 0;
+for (int i = 0; i < data.length; i++) {
+    Expert.process(data[i]);
+}
+// answer = evenSum + oddCount`}
               </pre>
+            </div>
+
+            <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3">
+              <div className="text-cyan-500/40 text-xs text-center mb-2">מעקב מצב</div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="border border-cyan-500/30 rounded p-2">
+                  <div className="text-cyan-500/50 text-[10px]">evenSum</div>
+                  <div className="text-cyan-400 font-bold text-sm">0 → ?</div>
+                </div>
+                <div className="border border-cyan-500/30 rounded p-2">
+                  <div className="text-cyan-500/50 text-[10px]">oddCount</div>
+                  <div className="text-cyan-400 font-bold text-sm">0 → ?</div>
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-cyan-500/10 pt-4">
               <div className="text-amber-400/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
-              <label className="block text-cyan-500/60 text-xs mb-1">ערך sum בסיום הלולאה</label>
+              <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">evenSum + oddCount = ?</label>
               <input
                 type="number"
                 value={answers[1]}
@@ -365,7 +357,7 @@ while (i >= 0 && i < data.length) {
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="sum = ?"
+                placeholder="evenSum + oddCount = ?"
               />
             </div>
 
@@ -375,78 +367,55 @@ while (i >= 0 && i < data.length) {
           </div>
         )}
 
-        {/* ==================== MODULE 2: Linked Lists ==================== */}
+        {/* ==================== MODULE 2: Chars & Strings ==================== */}
         {activeModule === 2 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3">
-              <div className="text-violet-500/40 text-xs text-center mb-2">מחלקת Node</div>
-              <pre className="text-violet-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`class Node {
-    private int val;
-    private Node next;
-
-    public Node(int val, Node next) {
-        this.val = val;
-        this.next = next;
-    }
-
-    public int getValue() { return val; }
-    public void setValue(int v) { val = v; }
-    public Node getNext() { return next; }
-    public void setNext(Node n) { next = n; }
-}`}
-              </pre>
-            </div>
-
-            <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3">
-              <div className="text-violet-500/40 text-xs text-center mb-2">רשימה מקושרת — מצב התחלתי</div>
-              <div className="flex items-center gap-1 overflow-x-auto py-2 justify-center" dir="ltr">
-                {LINKED_LIST.map((node, i) => (
-                  <div key={node.name} className="flex items-center gap-1">
-                    <div className="border border-violet-500/40 rounded bg-gray-950/80 flex text-center
+              <div className="text-violet-500/40 text-xs text-center mb-2">מחרוזת הקלט</div>
+              <div className="flex justify-center gap-1" dir="ltr">
+                {STRING_DATA.split('').map((ch, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="text-violet-500/30 text-[9px]">{idx}</div>
+                    <div className="border border-violet-500/40 rounded px-2 py-1.5 bg-gray-950
+                                    text-violet-400 text-sm font-bold min-w-[28px] text-center
                                     shadow-[0_0_6px_rgba(139,92,246,0.1)]">
-                      <div className="px-2 py-1.5 border-r border-violet-500/20">
-                        <div className="text-violet-300 text-[10px]">{node.name}</div>
-                        <div className="text-violet-400 font-bold text-sm">{node.val}</div>
-                      </div>
-                      <div className="px-2 py-1.5 text-violet-500/50 text-[10px] flex items-center">
-                        {node.next ?? 'null'}
-                      </div>
+                      {ch}
                     </div>
-                    {i < LINKED_LIST.length - 1 && (
-                      <span className="text-violet-500/60 text-lg">&rarr;</span>
-                    )}
                   </div>
                 ))}
-                <span className="text-violet-500/40 text-xs mr-1">&rarr; null</span>
               </div>
             </div>
 
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3">
-              <div className="text-violet-500/40 text-xs text-center mb-2">קוד הלולאה</div>
+              <div className="text-violet-500/40 text-xs text-center mb-2">קוד התוכנית</div>
               <pre className="text-violet-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`Node curr = A;
-while (curr != null) {
-    Experts.process(curr);
-}`}
+{`String word = "PROGRAM";
+int vowelCount = 0, consonantCount = 0;
+for (int i = 0; i < word.length(); i++) {
+    char c = word.charAt(i);
+    Expert.process(c);
+}
+// answer = vowelCount * 10 + consonantCount`}
               </pre>
             </div>
 
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3">
-              <div className="text-violet-500/40 text-xs text-center mb-2">חישוב הסכום בסיום</div>
-              <pre className="text-violet-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`int sum = 0;
-Node temp = A;
-while (temp != null) {
-    sum += temp.getValue();
-    temp = temp.getNext();
-}`}
-              </pre>
+              <div className="text-violet-500/40 text-xs text-center mb-2">מעקב מצב</div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="border border-violet-500/30 rounded p-2">
+                  <div className="text-violet-500/50 text-[10px]">vowelCount</div>
+                  <div className="text-violet-400 font-bold text-sm">0 → ?</div>
+                </div>
+                <div className="border border-violet-500/30 rounded p-2">
+                  <div className="text-violet-500/50 text-[10px]">consonantCount</div>
+                  <div className="text-violet-400 font-bold text-sm">0 → ?</div>
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-violet-500/10 pt-4">
               <div className="text-amber-400/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
-              <label className="block text-violet-500/60 text-xs mb-1">סכום ערכי החוליות בשרשרת A</label>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">vowelCount × 10 + consonantCount = ?</label>
               <input
                 type="number"
                 value={answers[2]}
@@ -455,7 +424,7 @@ while (temp != null) {
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="sum = ?"
+                placeholder="vowelCount * 10 + consonantCount = ?"
               />
             </div>
 
@@ -465,45 +434,64 @@ while (temp != null) {
           </div>
         )}
 
-        {/* ==================== MODULE 3: Matrix ==================== */}
+        {/* ==================== MODULE 3: Methods & String Length ==================== */}
         {activeModule === 3 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3">
-              <div className="text-amber-500/40 text-xs text-center mb-2">מטריצה 4&times;4</div>
-              <div dir="ltr">
-                <div className="grid grid-cols-[28px_1fr_1fr_1fr_1fr] gap-1 mb-1">
-                  <div />
-                  {[0, 1, 2, 3].map(c => (
-                    <div key={c} className="text-amber-500/30 text-[9px] text-center">{c}</div>
-                  ))}
-                </div>
-                {MATRIX_DATA.map((row, r) => (
-                  <div key={r} className="grid grid-cols-[28px_1fr_1fr_1fr_1fr] gap-1 mb-1">
-                    <div className="text-amber-500/30 text-[9px] flex items-center justify-center">{r}</div>
-                    {row.map((val, c) => (
-                      <div key={c} className="border border-amber-500/40 rounded bg-gray-950
-                                              text-amber-400 text-sm font-bold text-center py-1.5
-                                              shadow-[0_0_6px_rgba(245,158,11,0.1)]">
-                        {val}
-                      </div>
-                    ))}
+              <div className="text-amber-500/40 text-xs text-center mb-2">מערך המילים</div>
+              <div className="flex flex-wrap justify-center gap-1" dir="ltr">
+                {WORDS_DATA.map((word, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="border border-amber-500/40 rounded px-2 py-1.5 bg-gray-950
+                                    text-amber-400 text-xs font-bold text-center
+                                    shadow-[0_0_6px_rgba(245,158,11,0.1)]">
+                      <div className="text-amber-300">{word}</div>
+                      <div className="text-amber-500/50 text-[9px]">len={word.length}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
+            <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3">
+              <div className="text-amber-500/40 text-xs text-center mb-2">קוד התוכנית</div>
+              <pre className="text-amber-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
+{`String[] words = {"cat","hello","go","java","hi"};
+int longCount = 0, shortTotal = 0;
+for (int i = 0; i < words.length; i++) {
+    int len = words[i].length();
+    Expert.process(words[i], len);
+}
+// answer = longCount * 10 + shortTotal`}
+              </pre>
+            </div>
+
+            <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3">
+              <div className="text-amber-500/40 text-xs text-center mb-2">מעקב מצב</div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="border border-amber-500/30 rounded p-2">
+                  <div className="text-amber-500/50 text-[10px]">longCount (len&gt;3)</div>
+                  <div className="text-amber-400 font-bold text-sm">0 → ?</div>
+                </div>
+                <div className="border border-amber-500/30 rounded p-2">
+                  <div className="text-amber-500/50 text-[10px]">shortTotal (len≤3)</div>
+                  <div className="text-amber-400 font-bold text-sm">0 → ?</div>
+                </div>
+              </div>
+            </div>
+
             <div className="border-t border-amber-500/10 pt-4">
-              <div className="text-orange-400/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
-              <label className="block text-amber-500/60 text-xs mb-1">אינדקסים סופיים (rc)</label>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
+              <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">longCount × 10 + shortTotal = ?</label>
               <input
-                type="text"
+                type="number"
                 value={answers[3]}
                 onChange={(e) => setAnswer(3, e.target.value)}
-                className="w-full bg-gray-950 border border-orange-500/30 rounded px-3 py-2
-                           text-orange-400 font-mono text-lg text-center
-                           focus:outline-none focus:border-orange-400 focus:shadow-[0_0_10px_rgba(249,115,22,0.2)]
-                           transition-all placeholder:text-orange-500/20"
-                placeholder="rc = ?"
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="longCount * 10 + shortTotal = ?"
               />
             </div>
 
@@ -513,102 +501,66 @@ while (temp != null) {
           </div>
         )}
 
-        {/* ==================== MODULE 4: CPU Scheduler ==================== */}
+        {/* ==================== MODULE 4: Arrays Max & Second Max ==================== */}
         {activeModule === 4 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-red-500/15 rounded p-3">
-              <div className="text-red-500/40 text-xs text-center mb-2">תור התהליכים (Queue)</div>
-              <div className="flex items-center justify-center gap-1" dir="ltr">
-                <div className="border border-red-500/40 rounded px-2 py-1.5 bg-gray-950
-                                text-red-400/60 text-xs font-bold
-                                shadow-[0_0_6px_rgba(239,68,68,0.1)]">HEAD</div>
-                <span className="text-red-500/60 text-lg">&rarr;</span>
-                {QUEUE_DATA.map((val, idx) => (
-                  <div key={idx} className="flex items-center gap-1">
-                    <div className="border border-red-500/40 rounded px-3 py-1.5 bg-gray-950
-                                    text-red-400 text-sm font-bold min-w-[36px] text-center
-                                    shadow-[0_0_6px_rgba(239,68,68,0.1)]">
+              <div className="text-red-500/40 text-xs text-center mb-2">מערך הנתונים</div>
+              <div className="flex flex-wrap justify-center gap-1" dir="ltr">
+                {MAX_DATA.map((val, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <div className="text-red-500/30 text-[9px]">{idx}</div>
+                    <div className={`border rounded px-2 py-1.5 bg-gray-950
+                                    text-sm font-bold min-w-[36px] text-center
+                                    shadow-[0_0_6px_rgba(239,68,68,0.1)]
+                                    ${idx === 0 ? 'border-red-400 text-red-300' : 'border-red-500/40 text-red-400'}`}>
                       {val}
                     </div>
-                    <span className="text-red-500/60 text-lg">&rarr;</span>
                   </div>
                 ))}
-                <div className="border border-red-500/40 rounded px-2 py-1.5 bg-gray-950
-                                text-red-400/60 text-xs font-bold
-                                shadow-[0_0_6px_rgba(239,68,68,0.1)]">TAIL</div>
               </div>
-            </div>
-
-            <div className="bg-gray-950/80 border border-red-500/15 rounded p-3">
-              <div className="text-red-500/40 text-xs text-center mb-2">אוגרי CPU</div>
-              <div className="grid grid-cols-2 gap-3" dir="ltr">
-                <div className="border border-red-500/40 rounded p-3 bg-gray-950 text-center
-                                shadow-[0_0_10px_rgba(239,68,68,0.15)]">
-                  <div className="text-red-500/50 text-[10px] mb-1">REGISTER</div>
-                  <div className="text-red-400 font-bold text-xl">R1: 0</div>
-                </div>
-                <div className="border border-red-500/40 rounded p-3 bg-gray-950 text-center
-                                shadow-[0_0_10px_rgba(239,68,68,0.15)]">
-                  <div className="text-red-500/50 text-[10px] mb-1">REGISTER</div>
-                  <div className="text-red-400 font-bold text-xl">R2: 0</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-950/80 border border-red-500/15 rounded p-3">
-              <div className="text-red-500/40 text-xs text-center mb-2">מחלקת Queue (תור)</div>
-              <pre className="text-red-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`class Queue {
-    // מערך שמחזיק את האיברים בתור
-    int[] items = new int[100];
-    int size = 0;
-
-    // הוסף לסוף התור
-    void add(int val) {
-        items[size] = val;
-        size++;
-    }
-    // הוצא מתחילת התור
-    int poll() {
-        int first = items[0];
-        // הזז את כל האיברים מקום אחד שמאלה
-        for (int i = 0; i < size - 1; i++)
-            items[i] = items[i + 1];
-        size--;
-        return first;
-    }
-    boolean isEmpty() {
-        return size == 0;
-    }
-}`}
-              </pre>
+              <div className="text-red-500/50 text-[10px] text-center mt-2">הלולאה מתחילה מ-i=1. max=5, secondMax=5 בהתחלה.</div>
             </div>
 
             <div className="bg-gray-950/80 border border-red-500/15 rounded p-3">
               <div className="text-red-500/40 text-xs text-center mb-2">קוד התוכנית</div>
               <pre className="text-red-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`Queue q = new Queue();
-q.add(12); q.add(7);
-int R1 = 0, R2 = 0;
-while (!q.isEmpty()) {
-    int p = q.poll();
-    // Experts process p...
-}`}
+{`int[] data = {5, 12, 3, 18, 7, 15, 2, 9};
+int max = data[0];        // = 5
+int secondMax = data[0];  // = 5
+for (int i = 1; i < data.length; i++) {
+    Expert.update(data[i], max, secondMax);
+}
+// answer = max + secondMax`}
               </pre>
+            </div>
+
+            <div className="bg-gray-950/80 border border-red-500/15 rounded p-3">
+              <div className="text-red-500/40 text-xs text-center mb-2">מעקב מצב</div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="border border-red-500/30 rounded p-2">
+                  <div className="text-red-500/50 text-[10px]">max</div>
+                  <div className="text-red-400 font-bold text-sm">5 → ?</div>
+                </div>
+                <div className="border border-red-500/30 rounded p-2">
+                  <div className="text-red-500/50 text-[10px]">secondMax</div>
+                  <div className="text-red-400 font-bold text-sm">5 → ?</div>
+                </div>
+              </div>
             </div>
 
             <div className="border-t border-red-500/10 pt-4">
               <div className="text-amber-400/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
-              <label className="block text-red-500/60 text-xs mb-1">ערכי R1,R2 בסיום</label>
+              <label className="block text-red-500/60 text-xs mb-1" dir="rtl">max + secondMax = ?</label>
               <input
-                type="text"
+                type="number"
                 value={answers[4]}
                 onChange={(e) => setAnswer(4, e.target.value)}
                 className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="R1,R2 = ?"
+                placeholder="max + secondMax = ?"
               />
             </div>
 
@@ -618,84 +570,62 @@ while (!q.isEmpty()) {
           </div>
         )}
 
-        {/* ==================== MODULE 5: The Shape-Shifting Maze ==================== */}
+        {/* ==================== MODULE 5: Strings & Chars Combined ==================== */}
         {activeModule === 5 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3">
-              <div className="text-yellow-500/40 text-xs text-center mb-2">מפת החדרים — מצב התחלתי (חובה לצייר!)</div>
-              <div className="grid grid-cols-2 gap-2" dir="ltr">
-                {ROOMS_DATA.map((room) => (
-                  <div key={room.name} className="border border-yellow-500/40 rounded p-2 bg-gray-950
-                                                   shadow-[0_0_8px_rgba(234,179,8,0.1)]">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-yellow-300 font-bold text-sm">Room {room.name}</span>
-                      <span className="text-yellow-400 text-xs border border-yellow-500/30 rounded px-1.5 py-0.5 bg-yellow-500/10">
-                        ID={room.id}
-                      </span>
+              <div className="text-yellow-500/40 text-xs text-center mb-2">מערך השמות</div>
+              <div className="space-y-1" dir="ltr">
+                {NAMES_DATA.map((name, idx) => (
+                  <div key={idx} className="grid grid-cols-3 gap-1 text-center">
+                    <div className="border border-yellow-500/40 rounded px-2 py-1 bg-gray-950 text-yellow-300 text-xs font-bold">
+                      {name}
                     </div>
-                    <div className="text-yellow-500/70 text-[10px] space-y-0.5">
-                      <div>door1 &rarr; {room.door1}</div>
-                      <div>door2 &rarr; {room.door2}</div>
+                    <div className="border border-yellow-500/30 rounded px-2 py-1 bg-gray-950 text-yellow-400/70 text-xs">
+                      charAt(0)=&apos;{name[0]}&apos;
+                    </div>
+                    <div className="border border-yellow-500/30 rounded px-2 py-1 bg-gray-950 text-yellow-400/70 text-xs">
+                      len={name.length}
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="text-yellow-400/60 text-[10px] text-center mt-2">
-                START: Room A
-              </div>
-            </div>
-
-            <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3">
-              <div className="text-yellow-500/40 text-xs text-center mb-2">מחלקת Room</div>
-              <pre className="text-yellow-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`class Room {
-    String name;
-    int ID;
-    Room door1;
-    Room door2;
-
-    public Room(String name, int ID,
-                Room door1, Room door2) {
-        this.name = name;
-        this.ID = ID;
-        this.door1 = door1;
-        this.door2 = door2;
-    }
-}`}
-              </pre>
             </div>
 
             <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3">
               <div className="text-yellow-500/40 text-xs text-center mb-2">קוד התוכנית</div>
               <pre className="text-yellow-400 text-xs leading-relaxed overflow-x-auto" dir="ltr">
-{`Room current = A;
-int prevID = 0;
-for (int step = 0; step < 3; step++) {
-    int key = Beta.getKey(current.ID, prevID);
-    Room leftRoom = current;
-    int oldID = current.ID;
-    if (key % 2 == 0)
-        current = current.door1;  // Alpha
-    else
-        current = current.door2;  // Alpha
-    Gamma.mutate(leftRoom);       // swap + ID++
-    prevID = leftRoom.ID;         // after mutation
-}`}
+{`String[] names = {"Noa","Amit","Tamar","Ben","Yael"};
+int score = 0;
+for (int i = 0; i < names.length; i++) {
+    char first = names[i].charAt(0);
+    int len = names[i].length();
+    Expert.process(first, len);
+}
+// answer = score`}
               </pre>
+            </div>
+
+            <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3">
+              <div className="text-yellow-500/40 text-xs text-center mb-2">מעקב מצב</div>
+              <div className="border border-yellow-500/30 rounded p-2 text-center">
+                <div className="text-yellow-500/50 text-[10px]">score</div>
+                <div className="text-yellow-400 font-bold text-sm">0 → ?</div>
+              </div>
             </div>
 
             <div className="border-t border-yellow-500/10 pt-4">
               <div className="text-yellow-300/70 text-xs text-center mb-2">הזן את התשובה הסופית</div>
-              <label className="block text-yellow-500/60 text-xs mb-1">חדר + ID (למשל: B14)</label>
+              <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">score = ?</label>
               <input
-                type="text"
+                type="number"
                 value={answers[5]}
                 onChange={(e) => setAnswer(5, e.target.value)}
                 className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
                            text-yellow-400 font-mono text-lg text-center
                            focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
                            transition-all placeholder:text-yellow-500/20"
-                placeholder="?Room + ID"
+                placeholder="score = ?"
               />
             </div>
 

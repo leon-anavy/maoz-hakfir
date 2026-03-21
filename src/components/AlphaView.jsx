@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
 const UNLOCK_HASHES = {
-  2: 'f57e5cb1f4532c008183057ecc94283801fcb5afe2d1c190e3dfd38c4da08042',
-  3: 'a21855da08cb102d1d217c53dc5824a3a795c1c1a44e971bf01ab9da3a2acbbf',
-  4: '6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443',
-  5: '2935af6b5f217a111ac12faa513c905a06d2cfe806340b89c8b14b19e3fbccfe',
+  2: '624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4',
+  3: 'b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569',
+  4: '670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf',
+  5: 'c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894',
 }
 
 function getUnlockCode(m) {
@@ -18,66 +18,57 @@ function AlphaView() {
   const [codeFeedback, setCodeFeedback] = useState({ 2: null, 3: null, 4: null, 5: null })
 
   // Module 1 state
-  const [index, setIndex] = useState('')
-  const [value, setValue] = useState('')
-  const [sumGuess, setSumGuess] = useState('')
-  const [parityGuess, setParityGuess] = useState(null)
-  const [feedback, setFeedback] = useState(null)
+  const [m1Value, setM1Value] = useState('')
+  const [m1Route, setM1Route] = useState(null)
+  const [m1Feedback, setM1Feedback] = useState(null)
 
   // Module 2 state
-  const [m2Value, setM2Value] = useState('')
+  const [m2Char, setM2Char] = useState('')
   const [m2Route, setM2Route] = useState(null)
   const [m2Feedback, setM2Feedback] = useState(null)
 
   // Module 3 state
-  const [m3Row, setM3Row] = useState('')
-  const [m3Col, setM3Col] = useState('')
-  const [m3Diagonal, setM3Diagonal] = useState(null)
+  const [m3Len, setM3Len] = useState('')
+  const [m3Route, setM3Route] = useState(null)
   const [m3Feedback, setM3Feedback] = useState(null)
 
   // Module 4 state
-  const [m4ProcessVal, setM4ProcessVal] = useState('')
-  const [m4R1, setM4R1] = useState('')
-  const [m4R2, setM4R2] = useState('')
+  const [m4Value, setM4Value] = useState('')
+  const [m4CurrentMax, setM4CurrentMax] = useState('')
   const [m4Route, setM4Route] = useState(null)
   const [m4Feedback, setM4Feedback] = useState(null)
 
   // Module 5 state
-  const [m5Key, setM5Key] = useState('')
-  const [m5DoorChoice, setM5DoorChoice] = useState(null)
+  const [m5FirstChar, setM5FirstChar] = useState('')
+  const [m5Route, setM5Route] = useState(null)
   const [m5Feedback, setM5Feedback] = useState(null)
 
-  function verify() {
-    const i = parseInt(index, 10)
-    const v = parseInt(value, 10)
-    const guessedSum = parseInt(sumGuess, 10)
-    if (isNaN(i) || isNaN(v) || isNaN(guessedSum) || !parityGuess) return
-
-    const realSum = i + v
-    const realParity = realSum % 2 === 0 ? 'even' : 'odd'
-    const sumCorrect = guessedSum === realSum
-    const parityCorrect = parityGuess === realParity
-
-    if (sumCorrect && parityCorrect) {
-      const target = realParity === 'even' ? 'סוכן 1' : 'סוכן 2'
-      setFeedback({ success: true, target })
+  // Module 1 verify
+  function verifyM1() {
+    const v = parseInt(m1Value, 10)
+    if (isNaN(v) || !m1Route) return
+    const correctRoute = v % 2 === 0 ? 'beta' : 'gamma'
+    if (m1Route === correctRoute) {
+      const target = correctRoute === 'beta' ? 'סוכן 1' : 'סוכן 2'
+      setM1Feedback({ success: true, target })
     } else {
-      setFeedback({ success: false })
+      setM1Feedback({ success: false })
     }
   }
 
-  function reset() {
-    setIndex('')
-    setValue('')
-    setSumGuess('')
-    setParityGuess(null)
-    setFeedback(null)
+  function resetM1() {
+    setM1Value('')
+    setM1Route(null)
+    setM1Feedback(null)
   }
 
+  // Module 2 verify
   function verifyM2() {
-    const v = parseInt(m2Value, 10)
-    if (isNaN(v) || !m2Route) return
-    const correctRoute = v % 4 === 0 ? 'beta' : 'gamma'
+    const ch = m2Char.trim().toUpperCase()
+    if (!ch || ch.length !== 1 || !m2Route) return
+    const vowels = ['A', 'E', 'I', 'O', 'U']
+    const isVowel = vowels.includes(ch)
+    const correctRoute = isVowel ? 'beta' : 'gamma'
     if (m2Route === correctRoute) {
       const target = correctRoute === 'beta' ? 'סוכן 1' : 'סוכן 2'
       setM2Feedback({ success: true, target })
@@ -87,21 +78,18 @@ function AlphaView() {
   }
 
   function resetM2() {
-    setM2Value('')
+    setM2Char('')
     setM2Route(null)
     setM2Feedback(null)
   }
 
+  // Module 3 verify
   function verifyM3() {
-    const r = parseInt(m3Row, 10)
-    const c = parseInt(m3Col, 10)
-    if (isNaN(r) || isNaN(c) || !m3Diagonal) return
-
-    const conditionTrue = (r + c) % 3 === 0
-    const studentSaysDiagonal = m3Diagonal === 'diagonal'
-
-    if (conditionTrue === studentSaysDiagonal) {
-      const target = conditionTrue ? 'סוכן 1' : 'סוכן 2'
+    const len = parseInt(m3Len, 10)
+    if (isNaN(len) || !m3Route) return
+    const correctRoute = len > 3 ? 'beta' : 'gamma'
+    if (m3Route === correctRoute) {
+      const target = correctRoute === 'beta' ? 'סוכן 1' : 'סוכן 2'
       setM3Feedback({ success: true, target })
     } else {
       setM3Feedback({ success: false })
@@ -109,21 +97,17 @@ function AlphaView() {
   }
 
   function resetM3() {
-    setM3Row('')
-    setM3Col('')
-    setM3Diagonal(null)
+    setM3Len('')
+    setM3Route(null)
     setM3Feedback(null)
   }
 
+  // Module 4 verify
   function verifyM4() {
-    const p = parseInt(m4ProcessVal, 10)
-    const r1 = parseInt(m4R1, 10)
-    const r2 = parseInt(m4R2, 10)
-    if (isNaN(p) || isNaN(r1) || isNaN(r2) || !m4Route) return
-
-    const adjusted = r1 > r2 ? p - 2 : p
-    const correctRoute = adjusted % 2 === 0 ? 'beta' : 'gamma'
-
+    const v = parseInt(m4Value, 10)
+    const curMax = parseInt(m4CurrentMax, 10)
+    if (isNaN(v) || isNaN(curMax) || !m4Route) return
+    const correctRoute = v > curMax ? 'beta' : 'gamma'
     if (m4Route === correctRoute) {
       const target = correctRoute === 'beta' ? 'סוכן 1' : 'סוכן 2'
       setM4Feedback({ success: true, target })
@@ -133,27 +117,28 @@ function AlphaView() {
   }
 
   function resetM4() {
-    setM4ProcessVal('')
-    setM4R1('')
-    setM4R2('')
+    setM4Value('')
+    setM4CurrentMax('')
     setM4Route(null)
     setM4Feedback(null)
   }
 
+  // Module 5 verify
   function verifyM5() {
-    const key = parseInt(m5Key, 10)
-    if (isNaN(key) || !m5DoorChoice) return
-    const correctDoor = key % 2 === 0 ? 'door1' : 'door2'
-    if (m5DoorChoice === correctDoor) {
-      setM5Feedback({ success: true, door: correctDoor })
+    const ch = m5FirstChar.trim().toUpperCase()
+    if (!ch || ch.length !== 1 || !m5Route) return
+    const correctRoute = ch <= 'M' ? 'beta' : 'gamma'
+    if (m5Route === correctRoute) {
+      const target = correctRoute === 'beta' ? 'סוכן 1' : 'סוכן 2'
+      setM5Feedback({ success: true, target })
     } else {
       setM5Feedback({ success: false })
     }
   }
 
   function resetM5() {
-    setM5Key('')
-    setM5DoorChoice(null)
+    setM5FirstChar('')
+    setM5Route(null)
     setM5Feedback(null)
   }
 
@@ -219,11 +204,11 @@ function AlphaView() {
         {/* Module Tabs */}
         <div className="flex gap-2 mb-5">
           {[
-            { m: 1, label: 'מודול 1: מערכים', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
-            { m: 2, label: 'מודול 2: רשימה מקושרת', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
-            { m: 3, label: 'מודול 3: מטריצה', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
-            { m: 4, label: 'מודול 4: מתזמן CPU', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
-            { m: 5, label: 'מודול 5: המבוך', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
+            { m: 1, label: 'מודול 1: לולאות', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
+            { m: 2, label: 'מודול 2: תווים ומחרוזות', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
+            { m: 3, label: 'מודול 3: מתודות ואורך', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
+            { m: 4, label: 'מודול 4: מערכים — מקסימום', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
+            { m: 5, label: 'מודול 5: מחרוזות ותווים', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
           ].map(({ m, label, active }) => (
             <button
               key={m}
@@ -241,107 +226,68 @@ function AlphaView() {
           ))}
         </div>
 
-        {/* ==================== MODULE 1: Arrays ==================== */}
+        {/* ==================== MODULE 1: Loops (even/odd) ==================== */}
         {activeModule === 1 && (
           <div className="space-y-4">
             <div className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3">
-              <div className="text-cyan-400 font-bold text-xs text-center mb-2">שכבה 1 — חומת האש החיצונית</div>
-              <div className="text-cyan-300/80 text-xs leading-relaxed text-center mb-2" dir="rtl">
-                חדרתם למערכת המחשוב של המתקן. השכבה הראשונה היא חומת אש שסורקת מערך נתונים. כדי לעבור אותה, עליכם לעקוב אחר הלולאה ולחשב את הערך הסופי.
-              </div>
-              <div className="text-cyan-400/70 text-xs leading-relaxed space-y-1" dir="rtl">
-                <div>• <span className="text-cyan-300 font-bold">סוכן השטח</span> רואה מערך של מספרים וקוד לולאה. בכל צעד הוא מקריא את האינדקס (i) והערך (value) שבתא.</div>
-                <div>• <span className="text-cyan-300 font-bold">סוכן המנתב</span> מקבל את האינדקס והערך, מחשב ומחליט לאיזה סוכן מחשבים לפנות.</div>
-                <div>• <span className="text-cyan-300 font-bold">סוכן המחשבים</span> מחשב את האינדקס הבא ואומר לסוכן השטח לאיזה תא לקפוץ.</div>
-                <div className="text-center text-amber-400/80 font-bold">חזרו על התהליך עד שהלולאה נגמרת. בסוף — מה ערכו של sum?</div>
+              <div className="text-cyan-400 font-bold text-xs text-center mb-2">שכבה 1 — לולאות: זוגי/אי-זוגי</div>
+              <div className="text-cyan-400/70 text-xs leading-relaxed text-center" dir="rtl">
+                קבל ערך מסוכן השטח. בדוק אם הוא זוגי או אי-זוגי ונתב לסוכן המתאים.
               </div>
             </div>
             <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3 text-center space-y-1">
               <div className="text-cyan-500/40 text-xs">כלל הניתוב</div>
-              <div className="text-cyan-400 text-sm" dir="ltr">sum = i + value</div>
+              <div className="text-cyan-400 text-sm font-bold" dir="ltr">value % 2 == 0</div>
               <div className="text-sm">
-                <span className="text-blue-400">זוגי → סוכן 1</span>
+                <span className="text-blue-400">זוגי → סוכן 1 (Beta)</span>
                 <span className="text-cyan-500/30 mx-2">|</span>
-                <span className="text-purple-400">אי-זוגי → סוכן 2</span>
+                <span className="text-purple-400">אי-זוגי → סוכן 2 (Gamma)</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">אינדקס נוכחי (i)</label>
-                <input
-                  type="number"
-                  value={index}
-                  onChange={(e) => { setIndex(e.target.value); setFeedback(null) }}
-                  className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
-                             text-cyan-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
-                             transition-all placeholder:text-cyan-500/20"
-                  placeholder="i"
-                />
-              </div>
-              <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">ערך נוכחי (value)</label>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={(e) => { setValue(e.target.value); setFeedback(null) }}
-                  className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
-                             text-cyan-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
-                             transition-all placeholder:text-cyan-500/20"
-                  placeholder="val"
-                />
-              </div>
+            <div>
+              <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">ערך שהתקבל מסוכן השטח</label>
+              <input
+                type="number"
+                value={m1Value}
+                onChange={(e) => { setM1Value(e.target.value); setM1Feedback(null) }}
+                className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
+                           text-cyan-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
+                           transition-all placeholder:text-cyan-500/20"
+                placeholder="value"
+              />
             </div>
 
             <div className="border-t border-cyan-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאת החישוב שלך</div>
-
-              <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">מהו הסכום?</label>
-                <input
-                  type="number"
-                  value={sumGuess}
-                  onChange={(e) => { setSumGuess(e.target.value); setFeedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="i + value = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-cyan-500/60 text-xs mb-2">הסכום זוגי או אי-זוגי?</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setParityGuess('even'); setFeedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${parityGuess === 'even'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-cyan-500/20 text-cyan-500/50 hover:border-cyan-500/40 hover:text-cyan-400'
-                      }`}
-                  >
-                    זוגי (Even)
-                  </button>
-                  <button
-                    onClick={() => { setParityGuess('odd'); setFeedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${parityGuess === 'odd'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-cyan-500/20 text-cyan-500/50 hover:border-cyan-500/40 hover:text-cyan-400'
-                      }`}
-                  >
-                    אי-זוגי (Odd)
-                  </button>
-                </div>
+              <div className="text-amber-400/70 text-xs text-center mb-3">לאן מנתבים?</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => { setM1Route('beta'); setM1Feedback(null) }}
+                  className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
+                    ${m1Route === 'beta'
+                      ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
+                      : 'bg-gray-950 border-cyan-500/20 text-cyan-500/50 hover:border-cyan-500/40 hover:text-cyan-400'
+                    }`}
+                >
+                  זוגי → סוכן 1
+                </button>
+                <button
+                  onClick={() => { setM1Route('gamma'); setM1Feedback(null) }}
+                  className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
+                    ${m1Route === 'gamma'
+                      ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
+                      : 'bg-gray-950 border-cyan-500/20 text-cyan-500/50 hover:border-cyan-500/40 hover:text-cyan-400'
+                    }`}
+                >
+                  אי-זוגי → סוכן 2
+                </button>
               </div>
             </div>
 
             <div className="flex gap-2">
               <button
-                onClick={verify}
+                onClick={verifyM1}
                 className="flex-1 py-2.5 bg-cyan-500/10 border border-cyan-500/40 rounded
                            text-cyan-400 font-mono font-bold
                            hover:bg-cyan-500/20 hover:border-cyan-400
@@ -350,9 +296,9 @@ function AlphaView() {
               >
                 אמת פקודה
               </button>
-              {feedback && (
+              {m1Feedback && (
                 <button
-                  onClick={reset}
+                  onClick={resetM1}
                   className="px-4 py-2.5 border border-cyan-500/20 rounded
                              text-cyan-500/50 hover:text-cyan-400 hover:border-cyan-500/40
                              transition-all cursor-pointer"
@@ -362,15 +308,15 @@ function AlphaView() {
               )}
             </div>
 
-            {feedback && (
+            {m1Feedback && (
               <div className="mt-1">
-                {feedback.success ? (
+                {m1Feedback.success ? (
                   <div className="rounded p-4 text-center border
                                   bg-green-500/10 border-green-400/40 shadow-[0_0_20px_rgba(74,222,128,0.2)]
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      העבר את זכות הדיבור ל {feedback.target}
+                      העבר את זכות הדיבור ל {m1Feedback.target}
                     </div>
                   </div>
                 ) : (
@@ -379,7 +325,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת חישוב — נסה שוב
+                      שגיאת ניתוב — בדוק זוגיות ונסה שוב
                     </div>
                   </div>
                 )}
@@ -388,44 +334,39 @@ function AlphaView() {
           </div>
         )}
 
-        {/* ==================== MODULE 2: Linked Lists ==================== */}
+        {/* ==================== MODULE 2: Chars & Strings (vowels) ==================== */}
         {activeModule === 2 && (
           unlockedModules.has(2) ? (
           <div className="space-y-4">
             <div className="bg-violet-500/5 border border-violet-500/20 rounded p-3">
-              <div className="text-violet-400 font-bold text-xs text-center mb-2">שכבה 2 — שרשרת ההגנה</div>
-              <div className="text-violet-300/80 text-xs leading-relaxed text-center mb-2" dir="rtl">
-                עברתם את חומת האש! עכשיו אתם נתקלים בשרשרת הגנה — מנגנון שמקשר בין חוליות הגנה. כדי לפרוץ אותו, עליכם לעקוב אחר השרשרת ולשנות אותה מבפנים.
-              </div>
-              <div className="text-violet-400/70 text-xs leading-relaxed space-y-2" dir="rtl">
-                <div className="text-center">רשימה מקושרת היא שרשרת של חוליות. כל חוליה (Node) מחזיקה ערך מספרי ומצביע לחוליה הבאה. החוליה האחרונה מצביעה ל-null (סוף השרשרת).</div>
-                <div className="text-center">הקוד עובר על החוליות אחת-אחת. בכל צעד, סוכן השטח מקריא את הערך של החוליה הנוכחית. אתה מנתב לסוכן 1 או 2. הסוכן משנה את הערך של החוליה ואומר מה קורה הלאה.</div>
-                <div className="text-center text-amber-400/80 font-bold">ציירו את השרשרת! קראו את הקוד בעיון — בסוף חשבו את סכום הערכים של כל החוליות שנשארו מחוברות.</div>
+              <div className="text-violet-400 font-bold text-xs text-center mb-2">שכבה 2 — תווים: תנועה/עיצור</div>
+              <div className="text-violet-400/70 text-xs leading-relaxed text-center" dir="rtl">
+                קבל תו מסוכן השטח. בדוק אם הוא תנועה או עיצור ונתב לסוכן המתאים.
               </div>
             </div>
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3 text-center space-y-1">
               <div className="text-violet-500/40 text-xs">כלל הניתוב</div>
-              <div className="text-violet-400 text-sm font-bold" dir="ltr">
-                if (curr.getValue() % 4 == 0)
-              </div>
+              <div className="text-violet-400 text-sm font-bold" dir="ltr">char is vowel?</div>
+              <div className="text-violet-400/70 text-xs mb-1">תנועות: A, E, I, O, U</div>
               <div className="text-sm">
-                <span className="text-blue-400">מתחלק ב-4 → סוכן 1</span>
+                <span className="text-blue-400">תנועה → סוכן 1 (Beta)</span>
                 <span className="text-violet-500/30 mx-2">|</span>
-                <span className="text-purple-400">לא מתחלק ב-4 → סוכן 2</span>
+                <span className="text-purple-400">עיצור → סוכן 2 (Gamma)</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-violet-500/60 text-xs mb-1">מהו הערך (getValue) של החוליה הנוכחית?</label>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">תו שהתקבל (אות אחת)</label>
               <input
-                type="number"
-                value={m2Value}
-                onChange={(e) => { setM2Value(e.target.value); setM2Feedback(null) }}
+                type="text"
+                maxLength={1}
+                value={m2Char}
+                onChange={(e) => { setM2Char(e.target.value); setM2Feedback(null) }}
                 className="w-full bg-gray-950 border border-violet-500/30 rounded px-3 py-2
                            text-violet-400 font-mono text-lg text-center
                            focus:outline-none focus:border-violet-400 focus:shadow-[0_0_10px_rgba(139,92,246,0.2)]
                            transition-all placeholder:text-violet-500/20"
-                placeholder="curr.getValue()"
+                placeholder="char"
               />
             </div>
 
@@ -440,7 +381,7 @@ function AlphaView() {
                       : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
                     }`}
                 >
-                  מתחלק ב-4 ללא שארית (Beta)
+                  תנועה → סוכן 1
                 </button>
                 <button
                   onClick={() => { setM2Route('gamma'); setM2Feedback(null) }}
@@ -450,7 +391,7 @@ function AlphaView() {
                       : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
                     }`}
                 >
-                  לא מתחלק ב-4 (Gamma)
+                  עיצור → סוכן 2
                 </button>
               </div>
             </div>
@@ -495,7 +436,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת ניתוב — בדוק את החישוב ונסה שוב
+                      שגיאת ניתוב — בדוק אם התו תנועה ונסה שוב
                     </div>
                   </div>
                 )}
@@ -504,91 +445,63 @@ function AlphaView() {
           </div>
           ) : renderLockScreen(2)
         )}
-        {/* ==================== MODULE 3: Matrix (Diagonals) ==================== */}
+
+        {/* ==================== MODULE 3: Methods & String Length ==================== */}
         {activeModule === 3 && (
           unlockedModules.has(3) ? (
           <div className="space-y-4">
             <div className="bg-amber-500/5 border border-amber-500/20 rounded p-3">
-              <div className="text-amber-400 font-bold text-xs text-center mb-2">שכבה 3 — רשת האבטחה</div>
-              <div className="text-amber-300/80 text-xs leading-relaxed text-center mb-2" dir="rtl">
-                השרשרת נפרצה! אבל עכשיו אתם עומדים מול רשת אבטחה — מטריצה של חיישנים. עליכם לנווט בין התאים בדיוק, לשנות את הערכים ולהגיע לנקודה הנכונה בלי להפעיל אזעקה.
-              </div>
-              <div className="text-amber-400/70 text-xs leading-relaxed space-y-2" dir="rtl">
-                <div className="text-center">סוכן השטח רואה מטריצה 4&times;4 ומתחיל בעמדה (0,0). עליו לבצע בדיוק <span className="text-amber-400 font-bold">5 צעדים</span>.</div>
-                <div className="text-center font-bold text-amber-400">בכל צעד:</div>
-                <div>1. סוכן השטח מקריא את השורה (r), העמודה (c) והערך בתא</div>
-                <div>2. אתה (המנתב) בודק את התנאי ומנתב לסוכן 1 או 2</div>
-                <div>3. הסוכן מחשב ערך חדש — <span className="text-amber-400 font-bold">הערך החדש קובע את כיוון התנועה!</span></div>
-                <div>4. סוכן השטח מעדכן את הערך בתא וזז בכיוון שנאמר</div>
-                <div className="text-center border-t border-amber-500/20 pt-2 mt-1">
-                  <span className="text-amber-400 font-bold">כללי עטיפה:</span> שורה &gt; 3 → חזור ל-0 | עמודה &gt; 3 → חזור ל-0 | עמודה &lt; 0 → חזור ל-3
-                </div>
-                <div className="text-center text-amber-400/80 font-bold">אחרי 5 צעדים — באיזו שורה ועמודה אתה עומד? (לדוגמה: 21)</div>
+              <div className="text-amber-400 font-bold text-xs text-center mb-2">שכבה 3 — מתודות: אורך מילה</div>
+              <div className="text-amber-400/70 text-xs leading-relaxed text-center" dir="rtl">
+                קבל אורך מילה מסוכן השטח. בדוק אם len&gt;3 ונתב לסוכן המתאים.
               </div>
             </div>
             <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-amber-500/40 text-xs">Routing Condition</div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                if ((r + c) % 3 == 0)
-              </div>
-              <div className="text-sm" dir="ltr">
-                <span className="text-blue-400">true → Agent 1</span>
+              <div className="text-amber-500/40 text-xs">כלל הניתוב</div>
+              <div className="text-amber-400 text-sm font-bold" dir="ltr">len &gt; 3</div>
+              <div className="text-sm">
+                <span className="text-blue-400">אורך &gt; 3 → סוכן 1 (Beta)</span>
                 <span className="text-amber-500/30 mx-2">|</span>
-                <span className="text-purple-400">false → Agent 2</span>
+                <span className="text-purple-400">אורך ≤ 3 → סוכן 2 (Gamma)</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-amber-500/60 text-xs mb-1">שורה (r)</label>
-                <input
-                  type="number"
-                  value={m3Row}
-                  onChange={(e) => { setM3Row(e.target.value); setM3Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="r"
-                />
-              </div>
-              <div>
-                <label className="block text-amber-500/60 text-xs mb-1">עמודה (c)</label>
-                <input
-                  type="number"
-                  value={m3Col}
-                  onChange={(e) => { setM3Col(e.target.value); setM3Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="c"
-                />
-              </div>
+            <div>
+              <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">אורך המילה (len)</label>
+              <input
+                type="number"
+                value={m3Len}
+                onChange={(e) => { setM3Len(e.target.value); setM3Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="len"
+              />
             </div>
 
             <div className="border-t border-amber-500/10 pt-4">
-              <div className="text-orange-400/70 text-xs text-center mb-3">Evaluate the condition:</div>
+              <div className="text-amber-400/70 text-xs text-center mb-3">לאן מנתבים?</div>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => { setM3Diagonal('diagonal'); setM3Feedback(null) }}
+                  onClick={() => { setM3Route('beta'); setM3Feedback(null) }}
                   className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                    ${m3Diagonal === 'diagonal'
+                    ${m3Route === 'beta'
                       ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
                       : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
                     }`}
                 >
-                  Condition TRUE → Agent 1
+                  אורך &gt; 3 → סוכן 1
                 </button>
                 <button
-                  onClick={() => { setM3Diagonal('not_diagonal'); setM3Feedback(null) }}
+                  onClick={() => { setM3Route('gamma'); setM3Feedback(null) }}
                   className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                    ${m3Diagonal === 'not_diagonal'
+                    ${m3Route === 'gamma'
                       ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
                       : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
                     }`}
                 >
-                  Condition FALSE → Agent 2
+                  אורך ≤ 3 → סוכן 2
                 </button>
               </div>
             </div>
@@ -633,7 +546,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת ניתוב — בדוק את החישוב ונסה שוב
+                      שגיאת ניתוב — בדוק אם len&gt;3 ונסה שוב
                     </div>
                   </div>
                 )}
@@ -643,105 +556,57 @@ function AlphaView() {
           ) : renderLockScreen(3)
         )}
 
-        {/* ==================== MODULE 4: CPU Scheduler (Dispatcher) ==================== */}
+        {/* ==================== MODULE 4: Arrays Max ==================== */}
         {activeModule === 4 && (
           unlockedModules.has(4) ? (
           <div className="space-y-4">
             <div className="bg-red-500/5 border border-red-500/20 rounded p-3">
-              <div className="text-red-400 font-bold text-xs text-center mb-2">שכבה 4 — השתלטות על המעבד</div>
-              <div className="text-red-300/80 text-xs leading-relaxed text-center mb-2" dir="rtl">
-                עברתם את רשת האבטחה! עכשיו אתם בלב המערכת — המעבד (CPU) של המתקן. כדי לחלץ את נתוני האורניום, עליכם להשתלט על מתזמן התהליכים ולהריץ את התהליכים עד הסוף.
-              </div>
-              <div className="text-red-400/70 text-xs leading-relaxed space-y-2" dir="rtl">
-                <div className="text-center font-bold text-red-400">איך CPU עובד בעולם האמיתי?</div>
-                <div className="text-center">במחשב רצים הרבה תהליכים (processes) במקביל — דפדפן, מוזיקה, אפליקציות. ה-CPU לא יכול להריץ את כולם ביחד, אז הוא משתמש ב<span className="text-red-300 font-bold">מתזמן (Scheduler)</span> שמכניס אותם לתור ומעבד אותם אחד-אחד.</div>
-                <div className="border-t border-red-500/20 pt-2"></div>
-                <div className="text-center font-bold text-red-400">מה זה תור (Queue)?</div>
-                <div className="text-center">תור הוא כמו תור בסופר — הראשון שנכנס הוא הראשון שיוצא (FIFO). בקוד, זה מערך שמוסיפים לו בסוף (add) ומוציאים מההתחלה (poll).</div>
-                <div className="border-t border-red-500/20 pt-2"></div>
-                <div className="text-center font-bold text-red-400">מה זה ערך התהליך (Process Value)?</div>
-                <div className="text-center">כל מספר בתור מייצג תהליך. הערך שלו הוא כמה &quot;עבודה&quot; נשארה לו. למשל: התור מכיל [12, 7] — יש 2 תהליכים, הראשון עם ערך 12 והשני עם ערך 7.</div>
-                <div className="border-t border-red-500/20 pt-2"></div>
-                <div className="text-center font-bold text-red-400">מה זה אוגר (Register)?</div>
-                <div className="text-center">אוגר הוא משתנה בודד ב-CPU שמחזיק מספר. R1 ו-R2 מתחילים ב-0 וצוברים ערכים לאורך הריצה.</div>
-                <div className="border-t border-red-500/20 pt-2"></div>
-                <div className="text-center font-bold text-red-400">מחזור חיי תהליך:</div>
-                <div>1. שלוף תהליך מתחילת התור (poll) — למשל: שולפים 12</div>
-                <div>2. סוכן המנתב בודק עומס (R1 מול R2) ומנתב לסוכן 1 או 2</div>
-                <div>3. הסוכן מוסיף את ערך התהליך לאוגר ומקטין את הערך</div>
-                <div>4. אם הערך החדש &gt; 0 → התהליך <span className="text-green-400 font-bold">שורד</span> ונכנס חזרה לסוף התור עם הערך החדש</div>
-                <div>5. אם הערך החדש &le; 0 → התהליך <span className="text-red-400 font-bold">מת</span> ולא חוזר לתור</div>
-                <div>6. חוזרים לשלב 1 עד שהתור ריק</div>
-                <div className="border-t border-red-500/20 pt-2"></div>
-                <div className="text-center">
-                  <span className="text-amber-400 font-bold">דוגמה:</span> נניח תור=[20,9], R1=0, R2=0. שולפים 20. R1 לא גדול מ-R2 אז adjusted=20. 20 זוגי → סוכן 1. סוכן 1: R1=0+20=20, ערך חדש=20-4=16. 16&gt;0 → שורד! תור=[9,16].
-                </div>
-                <div className="text-center text-amber-400/70 font-bold">תשובה: ערכי R1,R2 בסיום (לדוגמה: 45,12)</div>
+              <div className="text-red-400 font-bold text-xs text-center mb-2">שכבה 4 — מערכים: מקסימום</div>
+              <div className="text-red-400/70 text-xs leading-relaxed text-center" dir="rtl">
+                קבל ערך נוכחי ומקסימום נוכחי. בדוק אם הערך גדול מהמקסימום ונתב לסוכן המתאים.
               </div>
             </div>
-            <div className="bg-gray-950/80 border border-red-500/15 rounded p-3 text-center space-y-2">
-              <div className="text-red-500/40 text-xs">כלל הניתוב — מתזמן CPU</div>
-              <div className="text-red-400 text-sm font-bold">
-                שלב 1: בדיקת עומס
-              </div>
-              <div className="text-red-400/70 text-xs">
-                אם R1 &gt; R2 → הפחת 2 מערך התהליך
-              </div>
-              <div className="text-red-400 text-sm font-bold mt-1">
-                שלב 2: ניתוב
-              </div>
+            <div className="bg-gray-950/80 border border-red-500/15 rounded p-3 text-center space-y-1">
+              <div className="text-red-500/40 text-xs">כלל הניתוב</div>
+              <div className="text-red-400 text-sm font-bold" dir="ltr">data[i] &gt; max</div>
               <div className="text-sm">
-                <span className="text-blue-400">זוגי → סוכן 1</span>
+                <span className="text-blue-400">גדול ממקסימום → סוכן 1 (Beta)</span>
                 <span className="text-red-500/30 mx-2">|</span>
-                <span className="text-purple-400">אי-זוגי → סוכן 2</span>
+                <span className="text-purple-400">לא גדול → סוכן 2 (Gamma)</span>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-red-500/60 text-xs mb-1">ערך התהליך הנוכחי</label>
-              <input
-                type="number"
-                value={m4ProcessVal}
-                onChange={(e) => { setM4ProcessVal(e.target.value); setM4Feedback(null) }}
-                className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
-                           text-red-400 font-mono text-lg text-center
-                           focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
-                           transition-all placeholder:text-red-500/20"
-                placeholder="process value"
-              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">R1</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">ערך נוכחי data[i]</label>
                 <input
                   type="number"
-                  value={m4R1}
-                  onChange={(e) => { setM4R1(e.target.value); setM4Feedback(null) }}
+                  value={m4Value}
+                  onChange={(e) => { setM4Value(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="R1"
+                  placeholder="value"
                 />
               </div>
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">R2</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">מקסימום נוכחי (max)</label>
                 <input
                   type="number"
-                  value={m4R2}
-                  onChange={(e) => { setM4R2(e.target.value); setM4Feedback(null) }}
+                  value={m4CurrentMax}
+                  onChange={(e) => { setM4CurrentMax(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="R2"
+                  placeholder="max"
                 />
               </div>
             </div>
 
             <div className="border-t border-red-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">לאן מנתבים את התהליך?</div>
+              <div className="text-amber-400/70 text-xs text-center mb-3">לאן מנתבים?</div>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => { setM4Route('beta'); setM4Feedback(null) }}
@@ -751,7 +616,7 @@ function AlphaView() {
                       : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
                     }`}
                 >
-                  שלח לסוכן 1
+                  גדול ממקסימום → סוכן 1
                 </button>
                 <button
                   onClick={() => { setM4Route('gamma'); setM4Feedback(null) }}
@@ -761,7 +626,7 @@ function AlphaView() {
                       : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
                     }`}
                 >
-                  שלח לסוכן 2
+                  לא גדול → סוכן 2
                 </button>
               </div>
             </div>
@@ -797,7 +662,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      VERIFIED: נתב למעבד {m4Feedback.target}
+                      נתב ל {m4Feedback.target}
                     </div>
                   </div>
                 ) : (
@@ -806,7 +671,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת ניתוב — בדוק את החישוב ונסה שוב
+                      שגיאת ניתוב — בדוק אם value&gt;max ונסה שוב
                     </div>
                   </div>
                 )}
@@ -816,78 +681,63 @@ function AlphaView() {
           ) : renderLockScreen(4)
         )}
 
-        {/* ==================== MODULE 5: Maze (Door Router) ==================== */}
+        {/* ==================== MODULE 5: Strings & Chars (charAt comparison) ==================== */}
         {activeModule === 5 && (
           unlockedModules.has(5) ? (
           <div className="space-y-4">
             <div className="bg-yellow-500/5 border border-yellow-500/20 rounded p-3">
-              <div className="text-yellow-400 font-bold text-xs text-center mb-2">שכבה 5 — המבוך האחרון</div>
-              <div className="text-yellow-400/70 text-xs leading-relaxed space-y-2" dir="rtl">
-                <div className="text-center font-bold text-yellow-400">השלב האחרון — המבוך</div>
-                <div className="text-center">הגעתם למבוך האחרון לפני האורניום! מערכת ההגנה האחרונה היא מבוך משתנה — 4 חדרים (A, B, C, D) שמחוברים ביניהם דרך דלתות. לכל חדר יש מספר זיהוי (ID) ושתי דלתות (door1, door2) שמובילות לחדרים אחרים.</div>
-                <div className="text-center">אבל זה לא מבוך רגיל — הוא <span className="text-amber-400 font-bold">משתנה תוך כדי תנועה!</span> אחרי כל תזוזה, החדר שעזבתם עובר מוטציה: הדלתות מתחלפות וה-ID עולה ב-1. אתם מתחילים בחדר A וצריכים לבצע בדיוק 3 תזוזות.</div>
-                <div className="border-t border-yellow-500/20 pt-2"></div>
-                <div className="text-center font-bold text-yellow-400">מה כל אחד עושה?</div>
-                <div>• <span className="text-yellow-300 font-bold">סוכן השטח:</span> רואה את מפת החדרים והקוד. מקריא את ה-ID של החדר הנוכחי וה-ID של החדר הקודם. מצייר את המבוך ומעדכן אותו אחרי כל צעד.</div>
-                <div>• <span className="text-yellow-300 font-bold">סוכן מחשבים 1:</span> מקבל את ה-ID הנוכחי והקודם, מחשב מפתח (Key) ומוסר אותו לסוכן המנתב.</div>
-                <div>• <span className="text-yellow-300 font-bold">סוכן המנתב:</span> מקבל את המפתח ואומר לסוכן השטח באיזו דלת לעבור (Key זוגי → door1, אי-זוגי → door2).</div>
-                <div>• <span className="text-yellow-300 font-bold">סוכן מחשבים 2:</span> אחרי שסוכן השטח עבר — מבצע מוטציה על החדר שעזב (מחליף דלתות ומעלה ID ב-1). אומר לסוכן השטח לעדכן את הציור.</div>
-                <div className="border-t border-yellow-500/20 pt-2"></div>
-                <div className="text-amber-400 font-bold text-center">חשוב! ציירו את המבוך על נייר ועדכנו אותו אחרי כל צעד!</div>
-                <div className="text-center">אחרי 3 תזוזות — באיזה חדר אתם ומה ה-ID שלו? (למשל: D6)</div>
+              <div className="text-yellow-400 font-bold text-xs text-center mb-2">שכבה 5 — תו ראשון: A עד M</div>
+              <div className="text-yellow-400/70 text-xs leading-relaxed text-center" dir="rtl">
+                קבל את התו הראשון של שם. בדוק אם הוא בין A ל-M (כולל) ונתב לסוכן המתאים.
               </div>
             </div>
-            <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3 text-center space-y-2">
-              <div className="text-yellow-500/40 text-xs">כלל הניתוב — המבוך</div>
-              <div className="text-yellow-400 text-sm font-bold">
-                שלב 1: בקש מסוכן 1 את המפתח (Key)
-              </div>
+            <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3 text-center space-y-1">
+              <div className="text-yellow-500/40 text-xs">כלל הניתוב</div>
+              <div className="text-yellow-400 text-sm font-bold" dir="ltr">first &lt;= &apos;M&apos;</div>
               <div className="text-sm">
-                <span className="text-blue-400">Key זוגי &rarr; door1</span>
+                <span className="text-blue-400">A עד M → סוכן 1 (Beta)</span>
                 <span className="text-yellow-500/30 mx-2">|</span>
-                <span className="text-purple-400">Key אי-זוגי &rarr; door2</span>
-              </div>
-              <div className="text-yellow-400/60 text-xs mt-1">
-                לאחר שסוכן השטח עבר חדר, הורה לסוכן 2 לבצע מוטציה!
+                <span className="text-purple-400">N עד Z → סוכן 2 (Gamma)</span>
               </div>
             </div>
 
             <div>
-              <label className="block text-yellow-500/60 text-xs mb-1">מהו המפתח (Key) שקיבלת מסוכן 1?</label>
+              <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">תו ראשון של השם</label>
               <input
-                type="number"
-                value={m5Key}
-                onChange={(e) => { setM5Key(e.target.value); setM5Feedback(null) }}
+                type="text"
+                maxLength={1}
+                value={m5FirstChar}
+                onChange={(e) => { setM5FirstChar(e.target.value); setM5Feedback(null) }}
                 className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
                            text-yellow-400 font-mono text-lg text-center
                            focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
                            transition-all placeholder:text-yellow-500/20"
-                placeholder="Key = ?"
+                placeholder="first char"
               />
             </div>
 
             <div className="border-t border-yellow-500/10 pt-4">
-              <div className="text-yellow-300/70 text-xs text-center mb-3">באיזו דלת סוכן השטח צריך לעבור?</div>
+              <div className="text-yellow-300/70 text-xs text-center mb-3">לאן מנתבים?</div>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => { setM5DoorChoice('door1'); setM5Feedback(null) }}
+                  onClick={() => { setM5Route('beta'); setM5Feedback(null) }}
                   className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                    ${m5DoorChoice === 'door1'
+                    ${m5Route === 'beta'
                       ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
                       : 'bg-gray-950 border-yellow-500/20 text-yellow-500/50 hover:border-yellow-500/40 hover:text-yellow-400'
                     }`}
                 >
-                  door1 (Key זוגי)
+                  A עד M → סוכן 1
                 </button>
                 <button
-                  onClick={() => { setM5DoorChoice('door2'); setM5Feedback(null) }}
+                  onClick={() => { setM5Route('gamma'); setM5Feedback(null) }}
                   className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                    ${m5DoorChoice === 'door2'
+                    ${m5Route === 'gamma'
                       ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
                       : 'bg-gray-950 border-yellow-500/20 text-yellow-500/50 hover:border-yellow-500/40 hover:text-yellow-400'
                     }`}
                 >
-                  door2 (Key אי-זוגי)
+                  N עד Z → סוכן 2
                 </button>
               </div>
             </div>
@@ -923,7 +773,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      הורה לסוכן השטח לעבור דרך {m5Feedback.door}! לאחר מכן — הורה לסוכן 2 לבצע מוטציה
+                      נתב ל {m5Feedback.target}
                     </div>
                   </div>
                 ) : (
@@ -932,7 +782,7 @@ function AlphaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת ניתוב — בדוק את זוגיות המפתח ונסה שוב
+                      שגיאת ניתוב — בדוק אם התו ≤ M ונסה שוב
                     </div>
                   </div>
                 )}

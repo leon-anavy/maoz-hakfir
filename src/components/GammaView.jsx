@@ -1,10 +1,10 @@
 import { useState } from 'react'
 
 const UNLOCK_HASHES = {
-  2: 'f57e5cb1f4532c008183057ecc94283801fcb5afe2d1c190e3dfd38c4da08042',
-  3: 'a21855da08cb102d1d217c53dc5824a3a795c1c1a44e971bf01ab9da3a2acbbf',
-  4: '6f4b6612125fb3a0daecd2799dfd6c9c299424fd920f9b308110a2c1fbd8f443',
-  5: '2935af6b5f217a111ac12faa513c905a06d2cfe806340b89c8b14b19e3fbccfe',
+  2: '624b60c58c9d8bfb6ff1886c2fd605d2adeb6ea4da576068201b6c6958ce93f4',
+  3: 'b7a56873cd771f2c446d369b649430b65a756ba278ff97ec81bb6f55b2e73569',
+  4: '670671cd97404156226e507973f2ab8330d3022ca96e0c93bdbdb320c41adcaf',
+  5: 'c6f3ac57944a531490cd39902d0f777715fd005efac9a30622d5f5205e7f6894',
 }
 
 function getUnlockCode(m) {
@@ -17,166 +17,129 @@ function GammaView() {
   const [codeInputs, setCodeInputs] = useState({ 2: '', 3: '', 4: '', 5: '' })
   const [codeFeedback, setCodeFeedback] = useState({ 2: null, 3: null, 4: null, 5: null })
 
-  // Module 1 state
-  const [index, setIndex] = useState('')
-  const [value, setValue] = useState('')
-  const [answer, setAnswer] = useState('')
-  const [feedback, setFeedback] = useState(null)
+  // Module 1 state — oddCount++
+  const [m1OddCount, setM1OddCount] = useState('')
+  const [m1NewOddCount, setM1NewOddCount] = useState('')
+  const [m1Feedback, setM1Feedback] = useState(null)
 
-  // Module 2 state
-  const [m2CurrVal, setM2CurrVal] = useState('')
-  const [m2NewVal, setM2NewVal] = useState('')
-  const [m2Action, setM2Action] = useState(null)
-  const [m2Pointer, setM2Pointer] = useState(null)
+  // Module 2 state — consonantCount++
+  const [m2ConsonantCount, setM2ConsonantCount] = useState('')
+  const [m2NewConsonantCount, setM2NewConsonantCount] = useState('')
   const [m2Feedback, setM2Feedback] = useState(null)
 
-  // Module 3 state
-  const [m3Row, setM3Row] = useState('')
-  const [m3Col, setM3Col] = useState('')
-  const [m3NewVal3, setM3NewVal3] = useState('')
-  const [m3Direction, setM3Direction] = useState(null)
+  // Module 3 state — shortTotal += len
+  const [m3ShortTotal, setM3ShortTotal] = useState('')
+  const [m3Len, setM3Len] = useState('')
+  const [m3NewShortTotal, setM3NewShortTotal] = useState('')
   const [m3Feedback, setM3Feedback] = useState(null)
 
-  // Module 4 state
-  const [m4R2, setM4R2] = useState('')
-  const [m4ProcessVal, setM4ProcessVal] = useState('')
-  const [m4NewR2, setM4NewR2] = useState('')
-  const [m4QueueAction, setM4QueueAction] = useState(null)
+  // Module 4 state — if (value > secondMax) secondMax = value; else no change
+  const [m4Value, setM4Value] = useState('')
+  const [m4SecondMax, setM4SecondMax] = useState('')
+  const [m4NewSecondMax, setM4NewSecondMax] = useState('')
   const [m4Feedback, setM4Feedback] = useState(null)
 
-  // Module 5 state
-  const [m5RoomID, setM5RoomID] = useState('')
-  const [m5Door1, setM5Door1] = useState('')
-  const [m5Door2, setM5Door2] = useState('')
-  const [m5NewID, setM5NewID] = useState('')
-  const [m5NewDoor1, setM5NewDoor1] = useState('')
-  const [m5NewDoor2, setM5NewDoor2] = useState('')
+  // Module 5 state — score += len * 2
+  const [m5Score, setM5Score] = useState('')
+  const [m5Len, setM5Len] = useState('')
+  const [m5NewScore, setM5NewScore] = useState('')
   const [m5Feedback, setM5Feedback] = useState(null)
 
-  function verify() {
-    const i = parseInt(index, 10)
-    const v = parseInt(value, 10)
-    const studentAnswer = parseInt(answer, 10)
-    if (isNaN(i) || isNaN(v) || isNaN(studentAnswer)) return
-
-    const step = v > 50 ? 2 : 1
-    const realAnswer = i + step
-
-    if (studentAnswer === realAnswer) {
-      setFeedback({ success: true, nextIndex: realAnswer })
+  // Module 1 verify
+  function verifyM1() {
+    const oc = parseInt(m1OddCount, 10)
+    const noc = parseInt(m1NewOddCount, 10)
+    if (isNaN(oc) || isNaN(noc)) return
+    if (noc === oc + 1) {
+      setM1Feedback({ success: true, result: noc })
     } else {
-      setFeedback({ success: false })
+      setM1Feedback({ success: false })
     }
   }
 
-  function reset() {
-    setIndex('')
-    setValue('')
-    setAnswer('')
-    setFeedback(null)
+  function resetM1() {
+    setM1OddCount('')
+    setM1NewOddCount('')
+    setM1Feedback(null)
   }
 
+  // Module 2 verify
   function verifyM2() {
-    const curr = parseInt(m2CurrVal, 10)
-    const newV = parseInt(m2NewVal, 10)
-    if (isNaN(curr) || isNaN(newV) || !m2Action || !m2Pointer) return
-
-    const valCorrect = newV === curr + 3
-    const actionCorrect = m2Action === 'skip'
-    const pointerCorrect = m2Pointer === 'stay'
-
-    if (valCorrect && actionCorrect && pointerCorrect) {
-      setM2Feedback({ success: true })
+    const cc = parseInt(m2ConsonantCount, 10)
+    const ncc = parseInt(m2NewConsonantCount, 10)
+    if (isNaN(cc) || isNaN(ncc)) return
+    if (ncc === cc + 1) {
+      setM2Feedback({ success: true, result: ncc })
     } else {
       setM2Feedback({ success: false })
     }
   }
 
   function resetM2() {
-    setM2CurrVal('')
-    setM2NewVal('')
-    setM2Action(null)
-    setM2Pointer(null)
+    setM2ConsonantCount('')
+    setM2NewConsonantCount('')
     setM2Feedback(null)
   }
 
+  // Module 3 verify
   function verifyM3() {
-    const r = parseInt(m3Row, 10)
-    const c = parseInt(m3Col, 10)
-    const newV = parseInt(m3NewVal3, 10)
-    if (isNaN(r) || isNaN(c) || isNaN(newV) || !m3Direction) return
-
-    const correctNewVal = (r + 1) * (c + 1)
-    const valCorrect = newV === correctNewVal
-    const correctDir = correctNewVal > 5 ? 'left' : 'down'
-    const dirCorrect = m3Direction === correctDir
-
-    if (valCorrect && dirCorrect) {
-      setM3Feedback({ success: true })
+    const st = parseInt(m3ShortTotal, 10)
+    const len = parseInt(m3Len, 10)
+    const nst = parseInt(m3NewShortTotal, 10)
+    if (isNaN(st) || isNaN(len) || isNaN(nst)) return
+    if (nst === st + len) {
+      setM3Feedback({ success: true, result: nst })
     } else {
       setM3Feedback({ success: false })
     }
   }
 
   function resetM3() {
-    setM3Row('')
-    setM3Col('')
-    setM3NewVal3('')
-    setM3Direction(null)
+    setM3ShortTotal('')
+    setM3Len('')
+    setM3NewShortTotal('')
     setM3Feedback(null)
   }
 
+  // Module 4 verify
   function verifyM4() {
-    const r2 = parseInt(m4R2, 10)
-    const p = parseInt(m4ProcessVal, 10)
-    const newR2 = parseInt(m4NewR2, 10)
-    if (isNaN(r2) || isNaN(p) || isNaN(newR2) || !m4QueueAction) return
-
-    const correctNewR2 = r2 + p
-    const newProcessVal = Math.floor(p / 2)
-    const correctAction = newProcessVal > 0 ? 'enqueue' : 'terminate'
-
-    if (newR2 === correctNewR2 && m4QueueAction === correctAction) {
-      setM4Feedback({ success: true })
+    const v = parseInt(m4Value, 10)
+    const sm = parseInt(m4SecondMax, 10)
+    const nsm = parseInt(m4NewSecondMax, 10)
+    if (isNaN(v) || isNaN(sm) || isNaN(nsm)) return
+    // if value > secondMax → new secondMax = value, else no change
+    const correctNewSM = v > sm ? v : sm
+    if (nsm === correctNewSM) {
+      setM4Feedback({ success: true, result: nsm, changed: v > sm })
     } else {
       setM4Feedback({ success: false })
     }
   }
 
   function resetM4() {
-    setM4R2('')
-    setM4ProcessVal('')
-    setM4NewR2('')
-    setM4QueueAction(null)
+    setM4Value('')
+    setM4SecondMax('')
+    setM4NewSecondMax('')
     setM4Feedback(null)
   }
 
+  // Module 5 verify
   function verifyM5() {
-    const id = parseInt(m5RoomID, 10)
-    const studentNewID = parseInt(m5NewID, 10)
-    const d1 = m5Door1.trim().toUpperCase()
-    const d2 = m5Door2.trim().toUpperCase()
-    const nd1 = m5NewDoor1.trim().toUpperCase()
-    const nd2 = m5NewDoor2.trim().toUpperCase()
-    if (isNaN(id) || isNaN(studentNewID) || !d1 || !d2 || !nd1 || !nd2) return
-
-    const correctNewID = id + 1
-    const swapCorrect = nd1 === d2 && nd2 === d1
-
-    if (studentNewID === correctNewID && swapCorrect) {
-      setM5Feedback({ success: true })
+    const sc = parseInt(m5Score, 10)
+    const len = parseInt(m5Len, 10)
+    const nsc = parseInt(m5NewScore, 10)
+    if (isNaN(sc) || isNaN(len) || isNaN(nsc)) return
+    if (nsc === sc + len * 2) {
+      setM5Feedback({ success: true, result: nsc })
     } else {
       setM5Feedback({ success: false })
     }
   }
 
   function resetM5() {
-    setM5RoomID('')
-    setM5Door1('')
-    setM5Door2('')
-    setM5NewID('')
-    setM5NewDoor1('')
-    setM5NewDoor2('')
+    setM5Score('')
+    setM5Len('')
+    setM5NewScore('')
     setM5Feedback(null)
   }
 
@@ -236,17 +199,17 @@ function GammaView() {
           סוכן מחשבים 2
         </h2>
         <p className="text-cyan-500/50 text-xs text-center mb-4">
-          COMPUTE_AGENT_2 :: REMAINDER_PATH
+          COMPUTE_AGENT_2 :: GAMMA_PATH
         </p>
 
         {/* Module Tabs */}
         <div className="flex gap-2 mb-5">
           {[
-            { m: 1, label: 'מודול 1: מערכים', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
-            { m: 2, label: 'מודול 2: רשימה מקושרת', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
-            { m: 3, label: 'מודול 3: מטריצה', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
-            { m: 4, label: 'מודול 4: מתזמן CPU', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
-            { m: 5, label: 'מודול 5: המבוך', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
+            { m: 1, label: 'מודול 1: לולאות', active: 'bg-cyan-500/15 border-cyan-400 text-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.2)]' },
+            { m: 2, label: 'מודול 2: תווים ומחרוזות', active: 'bg-violet-500/15 border-violet-400 text-violet-400 shadow-[0_0_10px_rgba(139,92,246,0.2)]' },
+            { m: 3, label: 'מודול 3: מתודות ואורך', active: 'bg-amber-500/15 border-amber-400 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' },
+            { m: 4, label: 'מודול 4: מערכים — מקסימום', active: 'bg-red-500/15 border-red-400 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]' },
+            { m: 5, label: 'מודול 5: מחרוזות ותווים', active: 'bg-yellow-500/15 border-yellow-400 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]' },
           ].map(({ m, label, active }) => (
             <button
               key={m}
@@ -264,68 +227,53 @@ function GammaView() {
           ))}
         </div>
 
-        {/* ==================== MODULE 1: Arrays ==================== */}
+        {/* ==================== MODULE 1: oddCount++ ==================== */}
         {activeModule === 1 && (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-cyan-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-cyan-500/40 text-xs">הכלל שלך</div>
-              <div className="text-cyan-400 text-lg font-bold" dir="ltr">nextIndex = i + 1</div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                if value &gt; 50 → nextIndex = i + 2
+              <div className="text-cyan-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-cyan-400 text-lg font-bold" dir="ltr">
+                oddCount++
               </div>
+              <div className="text-cyan-400/60 text-xs" dir="rtl">מגיעים אליך רק ערכים אי-זוגיים!</div>
             </div>
 
-            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3 text-cyan-400/70 text-xs leading-relaxed text-center">
-              חשב את האינדקס הבא לפי הכלל. שים לב לחריגה! הזן את התוצאה לאימות.
+            <div className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3 text-cyan-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל ערך אי-זוגי מהמנתב. הגדל את oddCount ב-1 ודווח את הערך החדש.
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">אינדקס נוכחי (i)</label>
-                <input
-                  type="number"
-                  value={index}
-                  onChange={(e) => { setIndex(e.target.value); setFeedback(null) }}
-                  className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
-                             text-cyan-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
-                             transition-all placeholder:text-cyan-500/20"
-                  placeholder="i"
-                />
-              </div>
-              <div>
-                <label className="block text-cyan-500/60 text-xs mb-1">ערך נוכחי (value)</label>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={(e) => { setValue(e.target.value); setFeedback(null) }}
-                  className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
-                             text-cyan-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
-                             transition-all placeholder:text-cyan-500/20"
-                  placeholder="val"
-                />
-              </div>
+            <div>
+              <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">oddCount נוכחי</label>
+              <input
+                type="number"
+                value={m1OddCount}
+                onChange={(e) => { setM1OddCount(e.target.value); setM1Feedback(null) }}
+                className="w-full bg-gray-950 border border-cyan-500/30 rounded px-3 py-2
+                           text-cyan-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(56,189,248,0.2)]
+                           transition-all placeholder:text-cyan-500/20"
+                placeholder="oddCount"
+              />
             </div>
 
             <div className="border-t border-cyan-500/10 pt-4">
               <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
-              <label className="block text-cyan-500/60 text-xs mb-1">האינדקס הבא (nextIndex)</label>
+              <label className="block text-cyan-500/60 text-xs mb-1" dir="rtl">oddCount חדש = ?</label>
               <input
                 type="number"
-                value={answer}
-                onChange={(e) => { setAnswer(e.target.value); setFeedback(null) }}
+                value={m1NewOddCount}
+                onChange={(e) => { setM1NewOddCount(e.target.value); setM1Feedback(null) }}
                 className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                            text-amber-400 font-mono text-lg text-center
                            focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                            transition-all placeholder:text-amber-500/20"
-                placeholder="?"
+                placeholder="oddCount + 1 = ?"
               />
             </div>
 
             <div className="flex gap-2">
               <button
-                onClick={verify}
+                onClick={verifyM1}
                 className="flex-1 py-2.5 bg-cyan-500/10 border border-cyan-500/40 rounded
                            text-cyan-400 font-mono font-bold
                            hover:bg-cyan-500/20 hover:border-cyan-400
@@ -334,9 +282,9 @@ function GammaView() {
               >
                 אמת פקודה
               </button>
-              {feedback && (
+              {m1Feedback && (
                 <button
-                  onClick={reset}
+                  onClick={resetM1}
                   className="px-4 py-2.5 border border-cyan-500/20 rounded
                              text-cyan-500/50 hover:text-cyan-400 hover:border-cyan-500/40
                              transition-all cursor-pointer"
@@ -346,15 +294,15 @@ function GammaView() {
               )}
             </div>
 
-            {feedback && (
+            {m1Feedback && (
               <div className="mt-1">
-                {feedback.success ? (
+                {m1Feedback.success ? (
                   <div className="rounded p-4 text-center border
                                   bg-green-500/10 border-green-400/40 shadow-[0_0_20px_rgba(74,222,128,0.2)]
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: האינדקס הבא הוא {feedback.nextIndex}
+                      דווח לסוכן השטח: oddCount = {m1Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -372,105 +320,48 @@ function GammaView() {
           </div>
         )}
 
-        {/* ==================== MODULE 2: Linked Lists ==================== */}
+        {/* ==================== MODULE 2: consonantCount++ ==================== */}
         {activeModule === 2 && (unlockedModules.has(2) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-violet-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-violet-500/40 text-xs">הכלל שלך (לא מתחלק ב-4)</div>
-              <div className="text-violet-400 text-sm font-bold" dir="ltr">
-                curr.setNext(curr.getNext().getNext());
+              <div className="text-violet-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-violet-400 text-lg font-bold" dir="ltr">
+                consonantCount++
               </div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                curr.setValue(curr.getValue() + 3);
-              </div>
+              <div className="text-violet-400/60 text-xs" dir="rtl">מגיעים אליך רק עיצורים!</div>
             </div>
 
-            <div className="bg-violet-500/5 border border-violet-500/20 rounded p-3 text-violet-400/70 text-xs leading-relaxed text-center">
-              שים לב! הכלל הזה משנה גם את המבנה וגם את הערך. חשוב: מה קורה לחוליה הבאה ומה קורה למצביע?
+            <div className="bg-violet-500/5 border border-violet-500/20 rounded p-3 text-violet-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל עיצור מהמנתב. הגדל את consonantCount ב-1 ודווח את הערך החדש.
             </div>
 
             <div>
-              <label className="block text-violet-500/60 text-xs mb-1">מה הערך הנוכחי לפני השינוי?</label>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">consonantCount נוכחי</label>
               <input
                 type="number"
-                value={m2CurrVal}
-                onChange={(e) => { setM2CurrVal(e.target.value); setM2Feedback(null) }}
+                value={m2ConsonantCount}
+                onChange={(e) => { setM2ConsonantCount(e.target.value); setM2Feedback(null) }}
                 className="w-full bg-gray-950 border border-violet-500/30 rounded px-3 py-2
                            text-violet-400 font-mono text-lg text-center
                            focus:outline-none focus:border-violet-400 focus:shadow-[0_0_10px_rgba(139,92,246,0.2)]
                            transition-all placeholder:text-violet-500/20"
-                placeholder="curr.getValue()"
+                placeholder="consonantCount"
               />
             </div>
 
             <div className="border-t border-violet-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאת החישוב שלך</div>
-
-              <div>
-                <label className="block text-violet-500/60 text-xs mb-1">מה יהיה הערך החדש?</label>
-                <input
-                  type="number"
-                  value={m2NewVal}
-                  onChange={(e) => { setM2NewVal(e.target.value); setM2Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="value + 3 = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-violet-500/60 text-xs mb-2">מה קורה לחוליה הבאה?</label>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => { setM2Action('skip'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Action === 'skip'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    מדלגים על החוליה הבאה (מחיקה)
-                  </button>
-                  <button
-                    onClick={() => { setM2Action('delete'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Action === 'delete'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    מוחקים את החוליה הנוכחית
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-violet-500/60 text-xs mb-2">מה קורה למצביע (curr)?</label>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => { setM2Pointer('advance'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Pointer === 'advance'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    המצביע מתקדם לחוליה הבאה
-                  </button>
-                  <button
-                    onClick={() => { setM2Pointer('stay'); setM2Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m2Pointer === 'stay'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-violet-500/20 text-violet-500/50 hover:border-violet-500/40 hover:text-violet-400'
-                      }`}
-                  >
-                    המצביע נשאר על החוליה הנוכחית
-                  </button>
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-violet-500/60 text-xs mb-1" dir="rtl">consonantCount חדש = ?</label>
+              <input
+                type="number"
+                value={m2NewConsonantCount}
+                onChange={(e) => { setM2NewConsonantCount(e.target.value); setM2Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="consonantCount + 1 = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -504,7 +395,7 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: דלג על חוליה, עדכן ערך, אל תתקדם!
+                      דווח לסוכן השטח: consonantCount = {m2Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -519,95 +410,66 @@ function GammaView() {
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(2)
-        )}
-        {/* ==================== MODULE 3: Matrix (Math.max) ==================== */}
+          </div>
+        ) : renderLockScreen(2))}
+
+        {/* ==================== MODULE 3: shortTotal += len ==================== */}
         {activeModule === 3 && (unlockedModules.has(3) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-amber-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-amber-500/40 text-xs">Your Rule (Condition FALSE)</div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                newValue = (r + 1) * (c + 1)
+              <div className="text-amber-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-amber-400 text-lg font-bold" dir="ltr">
+                shortTotal += len
               </div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                if (newValue &gt; 5) → c-- (left)
-              </div>
-              <div className="text-amber-400 text-sm font-bold" dir="ltr">
-                else → r++ (down)
-              </div>
+              <div className="text-amber-400/60 text-xs" dir="rtl">מגיעות אליך רק מילים קצרות (len ≤ 3)!</div>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/20 rounded p-3 text-amber-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל מילה קצרה מהמנתב. הוסף את אורכה ל-shortTotal ודווח את הסכום החדש.
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-amber-500/60 text-xs mb-1">Row (r)</label>
+                <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">shortTotal נוכחי</label>
                 <input
                   type="number"
-                  value={m3Row}
-                  onChange={(e) => { setM3Row(e.target.value); setM3Feedback(null) }}
+                  value={m3ShortTotal}
+                  onChange={(e) => { setM3ShortTotal(e.target.value); setM3Feedback(null) }}
                   className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                              text-amber-400 font-mono text-lg text-center
                              focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                              transition-all placeholder:text-amber-500/20"
-                  placeholder="r"
+                  placeholder="shortTotal"
                 />
               </div>
               <div>
-                <label className="block text-amber-500/60 text-xs mb-1">Column (c)</label>
+                <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">אורך המילה (len)</label>
                 <input
                   type="number"
-                  value={m3Col}
-                  onChange={(e) => { setM3Col(e.target.value); setM3Feedback(null) }}
+                  value={m3Len}
+                  onChange={(e) => { setM3Len(e.target.value); setM3Feedback(null) }}
                   className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
                              text-amber-400 font-mono text-lg text-center
                              focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
                              transition-all placeholder:text-amber-500/20"
-                  placeholder="c"
+                  placeholder="len"
                 />
               </div>
             </div>
 
             <div className="border-t border-amber-500/10 pt-4">
-              <div className="text-orange-400/70 text-xs text-center mb-3">Enter your result:</div>
-
-              <div>
-                <label className="block text-amber-500/60 text-xs mb-1">(r + 1) * (c + 1) = ?</label>
-                <input
-                  type="number"
-                  value={m3NewVal3}
-                  onChange={(e) => { setM3NewVal3(e.target.value); setM3Feedback(null) }}
-                  className="w-full bg-gray-950 border border-orange-500/30 rounded px-3 py-2
-                             text-orange-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-orange-400 focus:shadow-[0_0_10px_rgba(249,115,22,0.2)]
-                             transition-all placeholder:text-orange-500/20"
-                  placeholder="(r+1) * (c+1) = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-amber-500/60 text-xs mb-2">Direction (based on newValue):</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => { setM3Direction('left'); setM3Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m3Direction === 'left'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
-                      }`}
-                  >
-                    newValue &gt; 5 → c-- (left)
-                  </button>
-                  <button
-                    onClick={() => { setM3Direction('down'); setM3Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m3Direction === 'down'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-amber-500/20 text-amber-500/50 hover:border-amber-500/40 hover:text-amber-400'
-                      }`}
-                  >
-                    newValue &le; 5 → r++ (down)
-                  </button>
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-amber-500/60 text-xs mb-1" dir="rtl">shortTotal חדש = ?</label>
+              <input
+                type="number"
+                value={m3NewShortTotal}
+                onChange={(e) => { setM3NewShortTotal(e.target.value); setM3Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="shortTotal + len = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -641,7 +503,7 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      אמור לסוכן השטח: הערך החדש הוא התוצאה, זוז שמאלה. אם יוצאים מגבול — חזור לעמודה 3!
+                      דווח לסוכן השטח: shortTotal = {m3Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -656,98 +518,72 @@ function GammaView() {
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(3)
-        )}
+          </div>
+        ) : renderLockScreen(3))}
 
-        {/* ==================== MODULE 4: CPU Scheduler (R2 Logic) ==================== */}
+        {/* ==================== MODULE 4: if (value > secondMax) secondMax = value ==================== */}
         {activeModule === 4 && (unlockedModules.has(4) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-red-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-red-500/40 text-xs">הכלל שלך (תהליכים אי-זוגיים)</div>
+              <div className="text-red-500/40 text-xs">הנוסחה שלך</div>
               <div className="text-red-400 text-sm font-bold" dir="ltr">
-                R2 += processValue
+                if (value &gt; secondMax)
               </div>
               <div className="text-red-400 text-sm font-bold" dir="ltr">
-                processValue = processValue / 2
+                &nbsp;&nbsp;&nbsp;&nbsp;secondMax = value;
               </div>
-              <div className="text-red-400/70 text-xs">(חילוק שלמים — Java int division)</div>
+              <div className="text-red-400 text-sm font-bold" dir="ltr">
+                // else: no change
+              </div>
+              <div className="text-red-400/60 text-xs" dir="rtl">מגיעים אליך ערכים שאינם גדולים מה-max!</div>
             </div>
 
-            <div className="bg-red-500/5 border border-red-500/20 rounded p-3 text-red-400/70 text-xs leading-relaxed text-center">
-              חשב את הערך החדש של R2 לאחר הוספת ערך התהליך. האם התהליך שורד לאחר חילוק ב-2?
+            <div className="bg-red-500/5 border border-red-500/20 rounded p-3 text-red-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל ערך. אם הוא גדול מ-secondMax הנוכחי — עדכן אותו. אחרת — אל תשנה. דווח את secondMax החדש.
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">הערך הנוכחי של R2</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">ערך שהתקבל</label>
                 <input
                   type="number"
-                  value={m4R2}
-                  onChange={(e) => { setM4R2(e.target.value); setM4Feedback(null) }}
+                  value={m4Value}
+                  onChange={(e) => { setM4Value(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="R2"
+                  placeholder="value"
                 />
               </div>
               <div>
-                <label className="block text-red-500/60 text-xs mb-1">ערך התהליך</label>
+                <label className="block text-red-500/60 text-xs mb-1" dir="rtl">secondMax נוכחי</label>
                 <input
                   type="number"
-                  value={m4ProcessVal}
-                  onChange={(e) => { setM4ProcessVal(e.target.value); setM4Feedback(null) }}
+                  value={m4SecondMax}
+                  onChange={(e) => { setM4SecondMax(e.target.value); setM4Feedback(null) }}
                   className="w-full bg-gray-950 border border-red-500/30 rounded px-3 py-2
                              text-red-400 font-mono text-lg text-center
                              focus:outline-none focus:border-red-400 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]
                              transition-all placeholder:text-red-500/20"
-                  placeholder="process"
+                  placeholder="secondMax"
                 />
               </div>
             </div>
 
             <div className="border-t border-red-500/10 pt-4">
-              <div className="text-amber-400/70 text-xs text-center mb-3">הזן את תוצאת החישוב שלך</div>
-
-              <div>
-                <label className="block text-red-500/60 text-xs mb-1">מהו הערך החדש של R2?</label>
-                <input
-                  type="number"
-                  value={m4NewR2}
-                  onChange={(e) => { setM4NewR2(e.target.value); setM4Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
-                             text-amber-400 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
-                             transition-all placeholder:text-amber-500/20"
-                  placeholder="R2 + process = ?"
-                />
-              </div>
-
-              <div className="mt-3">
-                <label className="block text-red-500/60 text-xs mb-2">מה קורה לתהליך לאחר חילוק ב-2?</label>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => { setM4QueueAction('enqueue'); setM4Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m4QueueAction === 'enqueue'
-                        ? 'bg-blue-500/20 border-blue-400 text-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.2)]'
-                        : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
-                      }`}
-                  >
-                    הכנס חזרה לתור (Enqueue)
-                  </button>
-                  <button
-                    onClick={() => { setM4QueueAction('terminate'); setM4Feedback(null) }}
-                    className={`py-2.5 rounded font-mono text-sm border transition-all cursor-pointer
-                      ${m4QueueAction === 'terminate'
-                        ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.2)]'
-                        : 'bg-gray-950 border-red-500/20 text-red-500/50 hover:border-red-500/40 hover:text-red-400'
-                      }`}
-                  >
-                    סיים תהליך (Terminate)
-                  </button>
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-red-500/60 text-xs mb-1" dir="rtl">secondMax חדש = ?</label>
+              <input
+                type="number"
+                value={m4NewSecondMax}
+                onChange={(e) => { setM4NewSecondMax(e.target.value); setM4Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="secondMax חדש = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -781,7 +617,10 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      VERIFIED: אמור לסוכן השטח את ה-R2 החדש ואת פעולת התור
+                      {m4Feedback.changed
+                        ? `עדכון: secondMax = ${m4Feedback.result}`
+                        : `ללא שינוי: secondMax = ${m4Feedback.result}`
+                      }
                     </div>
                   </div>
                 ) : (
@@ -790,121 +629,72 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת חישוב — נסה שוב
+                      שגיאת חישוב — זכור: עדכן רק אם value&gt;secondMax
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(4)
-        )}
+          </div>
+        ) : renderLockScreen(4))}
 
-        {/* ==================== MODULE 5: Maze (The Mutant) ==================== */}
+        {/* ==================== MODULE 5: score += len * 2 ==================== */}
         {activeModule === 5 && (unlockedModules.has(5) ? (
           <div className="space-y-4">
             <div className="bg-gray-950/80 border border-yellow-500/15 rounded p-3 text-center space-y-1">
-              <div className="text-yellow-500/40 text-xs">הכלל שלך (המוטנט)</div>
-              <div className="text-yellow-400 text-sm font-bold">
-                1. החלף דלתות: door1 &harr; door2
+              <div className="text-yellow-500/40 text-xs">הנוסחה שלך</div>
+              <div className="text-yellow-400 text-lg font-bold" dir="ltr">
+                score += len * 2
               </div>
-              <div className="text-yellow-400 text-sm font-bold" dir="ltr">
-                2. ID = ID + 1
-              </div>
+              <div className="text-yellow-400/60 text-xs" dir="rtl">מגיעים אליך רק שמות שתו ראשון &gt; M!</div>
             </div>
 
-            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded p-3 text-yellow-400/70 text-xs leading-relaxed text-center">
-              מיד לאחר שסוכן השטח עבר חדר, עדכן את החדר שהוא עזב: החלף בין הדלתות והגדל את ה-ID ב-1. הורה לסוכן השטח לעדכן את הציור!
+            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded p-3 text-yellow-400/70 text-xs leading-relaxed text-center" dir="rtl">
+              קבל אורך שם מהמנתב. הוסף len*2 לניקוד ודווח את הניקוד החדש.
             </div>
 
-            <div className="border border-yellow-500/20 rounded p-3 bg-gray-950/60">
-              <div className="text-yellow-500/50 text-xs text-center mb-3">נתוני החדר שעזבו (לפני מוטציה)</div>
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-yellow-500/60 text-xs mb-1">ID נוכחי של החדר</label>
+                <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">ניקוד נוכחי (score)</label>
                 <input
                   type="number"
-                  value={m5RoomID}
-                  onChange={(e) => { setM5RoomID(e.target.value); setM5Feedback(null) }}
+                  value={m5Score}
+                  onChange={(e) => { setM5Score(e.target.value); setM5Feedback(null) }}
                   className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
                              text-yellow-400 font-mono text-lg text-center
                              focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
                              transition-all placeholder:text-yellow-500/20"
-                  placeholder="ID"
+                  placeholder="score"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <div>
-                  <label className="block text-yellow-500/60 text-xs mb-1">door1 מצביע ל...</label>
-                  <input
-                    type="text"
-                    value={m5Door1}
-                    onChange={(e) => { setM5Door1(e.target.value); setM5Feedback(null) }}
-                    className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
-                               text-yellow-400 font-mono text-lg text-center
-                               focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
-                               transition-all placeholder:text-yellow-500/20"
-                    placeholder="A/B/C/D"
-                  />
-                </div>
-                <div>
-                  <label className="block text-yellow-500/60 text-xs mb-1">door2 מצביע ל...</label>
-                  <input
-                    type="text"
-                    value={m5Door2}
-                    onChange={(e) => { setM5Door2(e.target.value); setM5Feedback(null) }}
-                    className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
-                               text-yellow-400 font-mono text-lg text-center
-                               focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
-                               transition-all placeholder:text-yellow-500/20"
-                    placeholder="A/B/C/D"
-                  />
-                </div>
+              <div>
+                <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">אורך השם (len)</label>
+                <input
+                  type="number"
+                  value={m5Len}
+                  onChange={(e) => { setM5Len(e.target.value); setM5Feedback(null) }}
+                  className="w-full bg-gray-950 border border-yellow-500/30 rounded px-3 py-2
+                             text-yellow-400 font-mono text-lg text-center
+                             focus:outline-none focus:border-yellow-400 focus:shadow-[0_0_10px_rgba(234,179,8,0.2)]
+                             transition-all placeholder:text-yellow-500/20"
+                  placeholder="len"
+                />
               </div>
             </div>
 
             <div className="border-t border-yellow-500/10 pt-4">
-              <div className="text-yellow-300/70 text-xs text-center mb-3">הזן את התוצאה לאחר המוטציה</div>
-
-              <div>
-                <label className="block text-yellow-500/60 text-xs mb-1">ID חדש</label>
-                <input
-                  type="number"
-                  value={m5NewID}
-                  onChange={(e) => { setM5NewID(e.target.value); setM5Feedback(null) }}
-                  className="w-full bg-gray-950 border border-amber-300/30 rounded px-3 py-2
-                             text-amber-300 font-mono text-lg text-center
-                             focus:outline-none focus:border-amber-300 focus:shadow-[0_0_10px_rgba(252,211,77,0.2)]
-                             transition-all placeholder:text-amber-300/20"
-                  placeholder="ID + 1 = ?"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-2">
-                <div>
-                  <label className="block text-yellow-500/60 text-xs mb-1">door1 חדש מצביע ל...</label>
-                  <input
-                    type="text"
-                    value={m5NewDoor1}
-                    onChange={(e) => { setM5NewDoor1(e.target.value); setM5Feedback(null) }}
-                    className="w-full bg-gray-950 border border-amber-300/30 rounded px-3 py-2
-                               text-amber-300 font-mono text-lg text-center
-                               focus:outline-none focus:border-amber-300 focus:shadow-[0_0_10px_rgba(252,211,77,0.2)]
-                               transition-all placeholder:text-amber-300/20"
-                    placeholder="A/B/C/D"
-                  />
-                </div>
-                <div>
-                  <label className="block text-yellow-500/60 text-xs mb-1">door2 חדש מצביע ל...</label>
-                  <input
-                    type="text"
-                    value={m5NewDoor2}
-                    onChange={(e) => { setM5NewDoor2(e.target.value); setM5Feedback(null) }}
-                    className="w-full bg-gray-950 border border-amber-300/30 rounded px-3 py-2
-                               text-amber-300 font-mono text-lg text-center
-                               focus:outline-none focus:border-amber-300 focus:shadow-[0_0_10px_rgba(252,211,77,0.2)]
-                               transition-all placeholder:text-amber-300/20"
-                    placeholder="A/B/C/D"
-                  />
-                </div>
-              </div>
+              <div className="text-amber-400/70 text-xs text-center mb-2">הזן את תוצאת החישוב שלך</div>
+              <label className="block text-yellow-500/60 text-xs mb-1" dir="rtl">ניקוד חדש = ?</label>
+              <input
+                type="number"
+                value={m5NewScore}
+                onChange={(e) => { setM5NewScore(e.target.value); setM5Feedback(null) }}
+                className="w-full bg-gray-950 border border-amber-500/30 rounded px-3 py-2
+                           text-amber-400 font-mono text-lg text-center
+                           focus:outline-none focus:border-amber-400 focus:shadow-[0_0_10px_rgba(245,158,11,0.2)]
+                           transition-all placeholder:text-amber-500/20"
+                placeholder="score + len * 2 = ?"
+              />
             </div>
 
             <div className="flex gap-2">
@@ -938,7 +728,7 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-green-500/70 text-xs mb-1 tracking-widest">VERIFIED</div>
                     <div className="text-green-400 font-bold text-lg">
-                      VERIFIED: הורה לסוכן השטח לעדכן את ציור המבוך!
+                      דווח לסוכן השטח: score = {m5Feedback.result}
                     </div>
                   </div>
                 ) : (
@@ -947,14 +737,14 @@ function GammaView() {
                                   animate-pulse">
                     <div className="text-red-500/70 text-xs mb-1 tracking-widest">ACCESS DENIED</div>
                     <div className="text-red-400 font-bold text-lg">
-                      שגיאת מוטציה — בדוק: החלפת דלתות + ID חדש
+                      שגיאת חישוב — זכור: score += len * 2
                     </div>
                   </div>
                 )}
               </div>
             )}
-          </div>) : renderLockScreen(5)
-        )}
+          </div>
+        ) : renderLockScreen(5))}
       </div>
     </div>
   )
