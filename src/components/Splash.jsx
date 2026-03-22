@@ -30,7 +30,7 @@ function Splash({ onComplete }) {
         style={{ perspective: '1000px' }}
       >
         <img
-          src="/logo2.png"
+          src={`${import.meta.env.BASE_URL}logo2.png`}
           alt="מָעוֹז הַכְּפִיר"
           className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 object-contain
                      drop-shadow-[0_0_40px_rgba(74,222,128,0.3)]"

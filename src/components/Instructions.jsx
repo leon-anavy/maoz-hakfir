@@ -122,7 +122,7 @@ function Instructions({ onComplete }) {
       <div className="w-full max-w-3xl">
         {/* Logo */}
         <div className="flex justify-center mb-4">
-          <img src="/logo2.png" alt="מָעוֹז הַכְּפִיר" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo2.png`} alt="מָעוֹז הַכְּפִיר" className="w-28 h-28 md:w-36 md:h-36 object-contain" />
         </div>
 
         {/* Progress dots */}

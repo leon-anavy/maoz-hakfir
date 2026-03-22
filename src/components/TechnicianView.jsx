@@ -264,7 +264,7 @@ function TechnicianView({ startTime }) {
 
       <div className="border border-green-500/30 rounded-lg p-6 w-full max-w-lg bg-gray-900/50">
         <div className="flex justify-center mb-2">
-          <img src="/logo2.png" alt="מָעוֹז הַכְּפִיר" className="w-20 h-20 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo2.png`} alt="מָעוֹז הַכְּפִיר" className="w-20 h-20 object-contain" />
         </div>
         <h2 className="text-2xl text-green-400 mb-1 text-center drop-shadow-[0_0_10px_rgba(74,222,128,0.3)]">
           סוכן שטח

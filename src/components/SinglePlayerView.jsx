@@ -768,7 +768,7 @@ function SinglePlayerView() {
     <div className="min-h-screen bg-gray-950 font-mono text-green-400 p-4 md:p-8" dir="rtl">
       {/* Header */}
       <div className="flex flex-col items-center mb-8">
-        <img src="/logo2.png" alt="B-MASTER HEIST" className="w-20 h-20 object-contain mb-3 drop-shadow-[0_0_20px_rgba(74,222,128,0.3)]" />
+        <img src={`${import.meta.env.BASE_URL}logo2.png`} alt="B-MASTER HEIST" className="w-20 h-20 object-contain mb-3 drop-shadow-[0_0_20px_rgba(74,222,128,0.3)]" />
         <h1 className="text-2xl md:text-3xl font-bold text-green-400 tracking-wide drop-shadow-[0_0_10px_rgba(74,222,128,0.4)]">
           B-MASTER HEIST
         </h1>

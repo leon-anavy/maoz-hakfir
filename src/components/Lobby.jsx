@@ -10,7 +10,7 @@ function Lobby({ onSelectRole }) {
     <div className="min-h-screen bg-gray-950 font-mono flex flex-col items-center justify-center p-8">
       <div className="w-full max-w-2xl mb-4 border-t border-green-500/30" />
 
-      <img src="/logo2.png" alt="מָעוֹז הַכְּפִיר" className="w-32 h-32 md:w-40 md:h-40 object-contain mb-4" />
+      <img src={`${import.meta.env.BASE_URL}logo2.png`} alt="מָעוֹז הַכְּפִיר" className="w-32 h-32 md:w-40 md:h-40 object-contain mb-4" />
 
       <h1
         className="text-4xl md:text-6xl font-bold text-green-400 mb-2

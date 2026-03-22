@@ -4,7 +4,7 @@ function VersionSelect({ onMultiplayer, onSolo }) {
       {/* Logo */}
       <div className="flex justify-center mb-6">
         <img
-          src="/logo2.png"
+          src={`${import.meta.env.BASE_URL}logo2.png`}
           alt="מָעוֹז הַכְּפִיר"
           className="w-32 h-32 object-contain drop-shadow-[0_0_30px_rgba(74,222,128,0.3)]"
         />

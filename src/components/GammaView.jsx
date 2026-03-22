@@ -193,7 +193,7 @@ function GammaView() {
     <div className="min-h-[60vh] flex flex-col items-center justify-center font-mono p-6">
       <div className="border border-cyan-500/30 rounded-lg p-6 w-full max-w-md bg-gray-900/50">
         <div className="flex justify-center mb-2">
-          <img src="/logo2.png" alt="מָעוֹז הַכְּפִיר" className="w-20 h-20 object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo2.png`} alt="מָעוֹז הַכְּפִיר" className="w-20 h-20 object-contain" />
         </div>
         <h2 className="text-2xl text-cyan-400 mb-1 text-center drop-shadow-[0_0_10px_rgba(56,189,248,0.3)]">
           סוכן מחשבים 2
